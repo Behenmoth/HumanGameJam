@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 [CreateAssetMenu(fileName = "i000",menuName = "アイテム作成")]
 
@@ -10,4 +11,6 @@ public class ItemList:ScriptableObject
     [Header("アイテム名")]
     public string ItemName;
 
+    [Header("アイテムイメージ")]
+    public Sprite ItemImage;
 }

@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: i000
   m_EditorClassIdentifier: Assembly-CSharp::ItemList
   ItemName: "\u30D3\u30FC\u30EB"
+  ItemImage: {fileID: 21300000, guid: f3f3272184330fb4fafcc85f462e96f5, type: 3}
