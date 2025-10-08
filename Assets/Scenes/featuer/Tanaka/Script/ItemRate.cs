@@ -103,8 +103,8 @@ public class ItemRate : MonoBehaviour
         // ========================
         ItemList second = GetRandomItemWithCustomRates(adjustedRates);
         // カスタム確率リストを使って2回目のアイテムを選ぶ
-        ItemList third = GetRandomItem();
-        ItemList fourth = GetRandomItem();
+        //ItemList third = GetRandomItem();
+        //ItemList fourth = GetRandomItem();
 
         // ========================
         // 結果をデバッグ出力
@@ -112,7 +112,7 @@ public class ItemRate : MonoBehaviour
         Debug.Log($"抽選結果 → 1つ目: {first?.ItemName}, 2つ目: {second?.ItemName}");
 
         // 抽選結果を配列で返す
-        return new ItemList[] { first, second,third,fourth};
+        return new ItemList[] { first, second };//,third,fourth};
     }
 
     // ========================
@@ -155,6 +155,31 @@ public class ItemRate : MonoBehaviour
         Debug.Log($"抽選結果 → 1つ目: {first?.ItemName}, 2つ目: {second?.ItemName}"); 
         return new ItemList[] { first, second }; 
     }*/
+    // 条件付きでランダムアイテムを1つ生成し、プレイヤーに渡す
+    public ItemList[] conditionalaGetRandomItem(ItemDistributor distributor, bool isPlayer1)
+    {
+        // --- アイテム選択前に一時的な状態をリセット ---
+        // （この関数が呼ばれるたびに新しく開始する）
+        ItemList selectedItem = null;
 
+        // --- ランダムで1つアイテムを取得（確率処理は GetRandomItem() に任せる）---
+        selectedItem = GetRandomItem();
+
+        if (selectedItem != null)
+        {
+            // --- 1つだけプレイヤーリストに追加 ---
+            distributor.AddConditionalItem(selectedItem, isPlayer1);
+
+            // --- デバッグ出力 ---
+            Debug.Log($"プレイヤー{(isPlayer1 ? "1" : "2")}がアイテム「{selectedItem.ItemName}」を取得しました！");
+        }
+        else
+        {
+            Debug.LogWarning("ランダムアイテムの取得に失敗しました。Rate設定を確認してください。");
+        }
+
+        // --- 今回生成されたアイテムだけを返す ---
+        return new ItemList[] { selectedItem };
+    }
 }
 
