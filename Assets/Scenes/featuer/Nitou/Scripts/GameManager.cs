@@ -48,6 +48,9 @@ public class GameManager : MonoBehaviour
     public TMP_Text roundText;
     public TMP_Text turnText;
 
+    [Header("UI制御")]
+    public bool canNexttrunButton;
+
     private void Awake()
     {
 
@@ -179,6 +182,7 @@ public class GameManager : MonoBehaviour
     //各プレイヤーのターン処理
     private void TurnManager()
     {
+
         //nextTurnButton.interactable = false;
         //アイテム使用が1回だけならアイテムを使用可能
         //if (ItemManager.instance.usedItems == true)
@@ -186,15 +190,27 @@ public class GameManager : MonoBehaviour
         //    canUseItems = true;
         //}
 
+
         //爆弾を1回以上叩かなければならない
         if (BombManager.instance != null && nextTurnButton != null)
         {
-            nextTurnButton.interactable = true;
+            if (BombManager.instance.bombClicked == true)
+            {
+                canNexttrunButton = true;
+            }
+            else
+            {
+                canNexttrunButton = false;
+            }
         }
-        else
+
+        //アイテムUIが開いている間はネクストターンボタンは押せない
+        if (ItemUIManager.instance.isUiOpen)
         {
-            nextTurnButton.interactable = false;
+            canNexttrunButton = false;
         }
+
+        nextTurnButton.interactable = canNexttrunButton;
     }
 
     //ターンを相手に渡す処理
