@@ -13,11 +13,25 @@ public class ItemRateSystem
 
 public class ItemRate : MonoBehaviour
 {
+    public static ItemRate instance;
+    
     [Header("アイテム一覧")]
     [SerializeField] private ItemList[] item; // 抽選対象のアイテム群
 
     [Header("アイテム出現確率設定")]
     [SerializeField] private List<ItemRateSystem> itemRateSystem; // 各アイテムの確率データリスト
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(instance);
+        }
+    }
 
     public void Start()
     {

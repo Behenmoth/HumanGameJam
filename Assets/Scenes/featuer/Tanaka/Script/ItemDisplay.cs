@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class ItemDisplay : MonoBehaviour
 {
+    public static ItemDisplay instance;
     // --- ItemDistributor（アイテム配布クラス）への参照 ---
     
     public ItemDistributor distributor;
@@ -206,6 +207,15 @@ public class ItemDisplay : MonoBehaviour
     private void Awake()
     {
         currentDisplay = this;
+
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(instance);
+        }
     }
 
     // --- 静的メソッドでUI側アイテムを削除（名前一致検索） ---

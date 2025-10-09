@@ -7,6 +7,8 @@ using System.Collections.Generic;
 /// </summary>
 public class ItemDistributor : MonoBehaviour
 {
+    public static ItemDistributor instance;
+
     [Header("アイテム確率システム参照")]
     [SerializeField] private ItemRate itemRateSystemScript; // アイテム出現確率を管理するスクリプト
 
@@ -25,10 +27,22 @@ public class ItemDistributor : MonoBehaviour
     // 各プレイヤーの所持上限
     private const int MaxItems = 4;
 
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(instance);
+        }
+    }
+
     private void Start()
     {
         // ゲーム開始時に初期配布
-        DistributeItems();
+        //DistributeItems();
     }
 
     /// <summary>
