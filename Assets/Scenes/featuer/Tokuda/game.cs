@@ -9,7 +9,13 @@ public class Game : MonoBehaviour
     public TextMeshPro counterText;       // 3Dオブジェクトのカウンター表示用
     public Button mainClickButton;
     public Button passButton;
+
     public Text turnIndicatorText; // Canvas上のターン表示用
+
+    [Header("Turn Indicator Settings")]
+    public RectTransform turnIndicatorRect; // ★ turnIndicatorTextのRectTransform
+    public float leftPositionX = -200f;     // ★ 1P側のX座標（例: -200）
+    public float rightPositionX = 200f;    // ★ 2P側のX座標（例: 200）
 
     [Header("Item Card UI")]
     public Button[] itemCardButtons;         // 各アイテムカード
@@ -21,7 +27,29 @@ public class Game : MonoBehaviour
     public Button cancelItemButton;         // 「キャンセル」ボタン
 
     public Sprite[] itemDescriptionSprites; // アイテム画像
-    
+
+
+    [Header("Round Result UI")]
+    public GameObject roundResultPanel;       // ラウンド結果パネル全体
+    public TextMeshProUGUI roundWinnerText;  // 勝利者表示用テキスト (例: "1P WIN")
+    public TextMeshProUGUI roundScoreText;   // スコア表示用テキスト (例: "SCORE 1 - 0")
+    public Button nextButton;                 // NEXTボタン
+
+
+    [Header("Game Info UI")]
+    public TextMeshProUGUI roundNumberText; // ★ ラウンド数を常に表示するための新しいテキスト
+    public TextMeshProUGUI scoreText;       // ★ スコアを常に表示するための新しいテキスト
+
+    [Header("Round Start UI")] // ★ 新しいヘッダー
+    public GameObject roundStartPanel;        // ラウンド開始パネル全体
+    public TextMeshProUGUI roundStartNumberText; // "ROUND ○" 表示用テキスト
+
+    [Header("Game Info Rects")] // ★ 新しいRectTransform変数
+    public RectTransform roundNumberRect;
+    public RectTransform scoreRect;
+    public float infoRightX = 200f;       // ★ 情報表示が右側に来る場合のX座標 (元: topPositionX)
+    public float infoLeftX = -200f;      // ★ 情報表示が左側に来る場合のX座標 (元: bottomPositionX)
+
     [Header("Rule UI")]
     public Button ruleButton;             // ルール表示開始ボタン
     public GameObject rulePanel;          // ルールパネル全体
@@ -34,11 +62,21 @@ public class Game : MonoBehaviour
     public Text winnerText;       // WINNER表示用テキスト
     public Text youDiedText;      // YOU DIED表示用テキスト
     public Text loserMessageText; // 負け犬メッセージ用テキスト
-    public Button nextButton;                 // NEXTボタン
-
+   
     [Header("Game Settings")]
     public int minStartCounter = 20;
     public int maxStartCounter = 40;
+
+    [Header("Messages")]
+    public string[] loserMessages = new string[] // ★ 負け犬メッセージの候補
+    {
+        "今日からお前の名前は負け犬だ。",
+        "才能の差だ。家で泣け。",
+        "敗北を知りたい。",
+        "ゴミが、消えろ。",
+        "ふふ...所詮、この程度の男よ。",
+        "残念だが、才能も運もなかったな。"
+    };
 
     // --- 状態変数 ---
     private int currentCounter;
@@ -89,13 +127,25 @@ public class Game : MonoBehaviour
             rulePanel.SetActive(false);
         }
 
+        // ★ ラウンド結果パネルを初期状態で非表示にする
+        if (roundResultPanel != null)
+        {
+            roundResultPanel.SetActive(false);
+        }
+
+
         // ★ ゲームオーバーパネルのボタンリスナーと初期非表示を追加
         nextButton.onClick.AddListener(OnNextButtonClicked);
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
         }
-
+ 
+        // ★ ラウンド開始パネルを初期状態で非表示にする
+        if (roundStartPanel != null)
+        {
+            roundStartPanel.SetActive(false);
+        }
         StartGame();
     }
 
@@ -105,6 +155,19 @@ public class Game : MonoBehaviour
         player1Score = 0;
         player2Score = 0;
         currentRound = 1;
+        
+        // ★ ラウンド数を初期表示
+        if (roundNumberText != null)
+        {
+            roundNumberText.text = $"ROUND {currentRound}";
+        }
+        
+        // ★ スコアを初期表示
+        if (scoreText != null)
+        {
+            scoreText.text = $"SCORE {player1Score} - {player2Score}";
+        }
+
         StartRound();
     }
 
@@ -113,7 +176,9 @@ public class Game : MonoBehaviour
         currentCounter = Random.Range(minStartCounter, maxStartCounter + 1);
         counterText.text = currentCounter.ToString();
         isPlayer1Turn = (Random.Range(0, 2) == 0);
-        StartTurn();
+        
+        // ★ ターン開始処理をコルーチンに置き換え、メッセージを表示
+        StartCoroutine(ShowRoundStartMessage(2.0f));
     }
     
     IEnumerator ShowRoundStartMessage(float delay)
@@ -123,11 +188,40 @@ public class Game : MonoBehaviour
         mainClickButton.interactable = false;
         passButton.interactable = false;
         
+        // ★ 他の常時表示UIも一時的に非表示にする
+        if (turnIndicatorText != null) turnIndicatorText.gameObject.SetActive(false);
+        if (roundNumberText != null) roundNumberText.gameObject.SetActive(false);
+        if (scoreText != null) scoreText.gameObject.SetActive(false);
+
+
+        // --- ★ ラウンド開始パネルを表示し、テキストを設定 ---
+        if (roundStartPanel != null)
+        {
+            roundStartPanel.SetActive(true);
+            if (roundStartNumberText != null)
+            {
+                roundStartNumberText.text = $"ROUND {currentRound}";
+            }
+        }
+        
+
         // ★ ラウンド数とスコアを表示
         turnIndicatorText.text = $"ラウンド {currentRound} 開始！ スコア: {player1Score} - {player2Score}";
 
         // 待機
         yield return new WaitForSeconds(delay);
+
+        // --- ★ ラウンド開始パネルを非表示にする ---
+        if (roundStartPanel != null)
+        {
+            roundStartPanel.SetActive(false);
+        }
+        
+        // ★ 他の常時表示UIを再表示する
+        if (turnIndicatorText != null) turnIndicatorText.gameObject.SetActive(true);
+        if (roundNumberText != null) roundNumberText.gameObject.SetActive(true);
+        if (scoreText != null) scoreText.gameObject.SetActive(true);
+
 
         // 待機後に実際のターンを開始
         StartTurn(); 
@@ -138,13 +232,35 @@ public class Game : MonoBehaviour
         clicksMadeInTurn = 0;
         isClickingAllowed = true;
         mainClickButton.interactable = true;
+        passButton.interactable = true;
+        
+        // ここでUIのgameObject.SetActive(true)は行わない。
+        // ShowRoundStartMessageの最後に再表示されるため。
 
- // ★ 追加: 前のターンで無効化されたPASSボタンを有効化して、操作を再開する
-        passButton.interactable = true; 
+        // --- ターンインジケーターの位置を更新 ---
+        float targetXTurn = isPlayer1Turn ? leftPositionX : rightPositionX;
+        if (turnIndicatorRect != null)
+        {
+            turnIndicatorRect.anchoredPosition = new Vector2(targetXTurn, turnIndicatorRect.anchoredPosition.y); 
+        }
+
+        // --- ラウンド/スコアの位置を更新 ---
+        float targetXInfo = isPlayer1Turn ? infoRightX : infoLeftX;
+        
+        if (roundNumberRect != null)
+        {
+            roundNumberRect.anchoredPosition = new Vector2(targetXInfo, roundNumberRect.anchoredPosition.y);
+        }
+
+        if (scoreRect != null)
+        {
+            scoreRect.anchoredPosition = new Vector2(targetXInfo, scoreRect.anchoredPosition.y);
+        }
 
         string playerTurnName = isPlayer1Turn ? "1P" : "2P";
         turnIndicatorText.text = playerTurnName + " turn";
     }
+    
 
     // --- ルール表示アクション ---
     // ルールボタンがクリックされたときに、ルールパネルを表示します。
@@ -333,6 +449,19 @@ public class Game : MonoBehaviour
     void EndRound(bool playerWhoLost)
     {
         isClickingAllowed = false;
+        mainClickButton.interactable = false;
+        passButton.interactable = false;
+        ruleButton.interactable = false; // ルールボタンも無効化
+
+        // アイテムやルールパネルも閉じる（もし開いていた場合）
+        if (itemPanel.activeSelf) itemPanel.SetActive(false);
+        if (rulePanel.activeSelf) rulePanel.SetActive(false);
+
+        // ★ ターン表示とラウンド/スコア表示を非表示にする
+        if (turnIndicatorText != null) turnIndicatorText.gameObject.SetActive(false);
+        if (roundNumberText != null) roundNumberText.gameObject.SetActive(false);
+        if (scoreText != null) scoreText.gameObject.SetActive(false);
+
 
         if (playerWhoLost)
         {
@@ -342,8 +471,14 @@ public class Game : MonoBehaviour
         {
             player1Score++;
         }
+        
+        // ★ スコアを更新
+        if (scoreText != null)
+        {
+            scoreText.text = $"SCORE {player1Score} - {player2Score}";
+        }
 
-        turnIndicatorText.text = $"ラウンド終了！ スコア: {player1Score} - {player2Score}";
+       // turnIndicatorText.text = $"ラウンド終了！ スコア: {player1Score} - {player2Score}";
 
         if (player1Score == 2 || player2Score == 2)
         {
@@ -351,17 +486,75 @@ public class Game : MonoBehaviour
             return;
         }
 
-        currentRound++;
-        StartCoroutine(WaitAndStartNextRound(3.0f));
+       
+        // --- ★ ラウンド結果パネル（YOU DIED画面）の表示ロジック ---
+        // 敗北メッセージは、ラウンド終了時に表示する。
+        if (gameOverPanel != null) //gameOverPanelがYOU DIED画面
+        {
+            gameOverPanel.SetActive(true); // パネルを表示
+
+            string loserName = playerWhoLost ? "1P" : "2P"; // 爆発させたプレイヤーが負け
+            string winnerName = playerWhoLost ? "2P" : "1P"; // 相手プレイヤーが勝利
+
+            // テキストを設定
+            youDiedText.text = "YOU DIED";
+            
+            // 2. ★ ランダムな負け犬メッセージを選択
+            string randomMessage = "";
+            if (loserMessages.Length > 0)
+            {
+                int randomIndex = Random.Range(0, loserMessages.Length);
+                randomMessage = loserMessages[randomIndex];
+            } else
+            {
+                randomMessage = "敗者よ、静かに眠れ。"; // 候補がない場合のフォールバック
+            }
+            
+            // 3. 負けたプレイヤー名とランダムメッセージを表示
+            loserMessageText.text = $"{randomMessage} ({loserName})"; 
+            
+            // 勝利したプレイヤー名を表示
+            winnerText.text = $"{winnerName} WIN! (Round {currentRound})"; 
+
+            // 次のラウンドへ移行
+            StartCoroutine(WaitAndStartNextRound(3.0f)); 
+        }
+        else
+        {
+            // パネルが設定されていない場合のフォールバック
+            currentRound++;
+            StartCoroutine(WaitAndStartNextRound(3.0f));
+        }
+
     }
 
     IEnumerator WaitAndStartNextRound(float delay)
     {
         yield return new WaitForSeconds(delay);
+        
+
+        // ★ YOU DIEDパネルを非表示にする
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+        
+        currentRound++; // 次のラウンドへ進める
+        
+        // ★ 新しいラウンド数を表示
+        if (roundNumberText != null)
+        {
+            roundNumberText.text = $"ROUND {currentRound}";
+        }
+        
         StartRound();
     }
     public void OnNextButtonClicked()
     {
+        if (roundResultPanel != null)
+        {
+            roundResultPanel.SetActive(false);
+        }
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false); // パネルを非表示にする
@@ -370,34 +563,30 @@ public class Game : MonoBehaviour
         // ★ ゲームをリスタートする
         StartGame();
 
-        // 必要に応じて、他のUI要素（例えばturnIndicatorText）も初期状態に戻す
-        turnIndicatorText.text = "Game Start!"; // 例
     }
 
     void EndGame()
-    {  // 全てのゲーム操作をロック
-        isClickingAllowed = false;
-        mainClickButton.interactable = false;
-        passButton.interactable = false;
+    {  
+        // ★ シンプルなスコアパネル（roundResultPanel）で最終結果を表示
+        if (roundResultPanel == null)
+        {
+            string winner = (player1Score == 2) ? "1P" : "2P";
+            turnIndicatorText.text = $"Winner {winner}";
+            return;
+        }
+        
+        // --- ゲーム終了パネル（シンプルなスコア画面）の表示ロジック ---
 
-        // アイテムやルールパネルも閉じる（もし開いていた場合）
-        if (itemPanel.activeSelf) itemPanel.SetActive(false);
-        if (rulePanel.activeSelf) rulePanel.SetActive(false);
+        roundResultPanel.SetActive(true); // パネルを表示
 
+        string finalWinnerName = (player1Score == 2) ? "1P" : "2P";
 
-        // 勝者を判定
-        string winnerName = (player1Score == 2) ? "1P" : "2P";
-        string loserName = (player1Score == 2) ? "2P" : "1P"; // 負けたプレイヤー
-
-        // WINNER表示
-        winnerText.text = $"WINNER {winnerName}";
-
-        // YOU DIEDと負け犬メッセージは固定テキスト
-        youDiedText.text = "YOU DIED";
-        loserMessageText.text = $"今日からお前の名前は負け犬だ。 ({loserName})"; // 誰が負けたか分かるように
-
-        // ゲームオーバーパネルを表示
-        gameOverPanel.SetActive(true);
+        // テキストを設定
+        roundWinnerText.text = $"{finalWinnerName} WIN!";
+        roundScoreText.text = $"SCORE {player1Score} - {player2Score}";
+        
+        // NOTE: ゲーム終了後はNEXTボタン（roundResultPanel内にはない）か、手動でのリスタートが必要です。
+        // （NEXTボタンはgameOverPanelにのみ実装されているため、リスタート処理は省略します）
 
     }
 }
