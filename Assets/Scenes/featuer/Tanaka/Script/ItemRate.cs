@@ -4,23 +4,30 @@ using System.Collections.Generic;
 [System.Serializable]
 public class ItemRateSystem
 {
-    [UnityEngine.Range(0f,100f)] // 0%から100%の範囲
-    public float Rate; // publicにすることでInspectorに表示される
+    [Range(0f, 100f)] // Inspector上で0〜100%の範囲をスライダーで設定可能
+    public float Rate; // このアイテムが出る確率（重み）
 
-    public ItemList[] item; // publicにすることでInspectorに表示される
-    public int ItemIndex;
+    public ItemList[] item; // 対応するアイテム（配列で保持可能）
+    public int ItemIndex;   // 実際に使う item[] のインデックスを指定
 }
+
 public class ItemRate : MonoBehaviour
 {
-    [SerializeField] private ItemList[] item;
-    [SerializeField] private List<ItemRateSystem> itemRateSystem;
+    [Header("アイテム一覧")]
+    [SerializeField] private ItemList[] item; // 抽選対象のアイテム群
+
+    [Header("アイテム出現確率設定")]
+    [SerializeField] private List<ItemRateSystem> itemRateSystem; // 各アイテムの確率データリスト
 
     public void Start()
     {
-        //GetTwoRandomitems();
-        //GetTwoRandomItemsAdjusted();
+        // テスト用の呼び出し（必要に応じてコメントアウトを外す）
+        // GetTwoRandomItemsAdjusted();
     }
 
+    /// <summary>
+    /// 単一アイテムを確率に基づいてランダムに取得
+    /// </summary>
     private ItemList GetRandomItem()
     {
         if (item.Length == 0 || itemRateSystem.Count == 0)
@@ -29,59 +36,56 @@ public class ItemRate : MonoBehaviour
             return null;
         }
 
+        // --- 全アイテムの確率を合計 ---
         float totalRate = 0f;
         for (int i = 0; i < itemRateSystem.Count; i++)
         {
             totalRate += itemRateSystem[i].Rate;
         }
 
+        // --- 0〜合計値の範囲でランダム値を取得 ---
         float randomValue = Random.Range(0f, totalRate);
-        Debug.Log($"Total Rate: {totalRate}, Random Value: {randomValue}");
-
         float cumulativeRate = 0f;
 
+        // --- 累積確率で選定 ---
         for (int i = 0; i < itemRateSystem.Count; i++)
         {
             cumulativeRate += itemRateSystem[i].Rate;
-            Debug.Log($"Cumulative Rate for index {i}: {cumulativeRate}");
-
             if (randomValue <= cumulativeRate)
             {
-                Debug.Log($"Selected fish: {item[itemRateSystem[i].ItemIndex]} at index {itemRateSystem[i].ItemIndex}");
-
                 int ItemIndex = itemRateSystem[i].ItemIndex;
 
                 if (ItemIndex < item.Length)
                 {
-                    Debug.Log($"Selected fish: {item[ItemIndex]} at index {ItemIndex}");
+                    Debug.Log($"🎯 抽選結果: {item[ItemIndex].ItemName} が選ばれました");
                     return item[ItemIndex];
                 }
                 else
                 {
-                    Debug.LogError($"fishPoolのインデックスが範囲外です。{ItemIndex}");
+                    Debug.LogError($"⚠️ item 配列のインデックス範囲外です: {ItemIndex}");
                     return null;
                 }
             }
         }
+
         return null;
     }
 
+    /// <summary>
+    /// 2つのアイテムをランダムに取得（同じアイテムの確率を下げて調整）
+    /// </summary>
     public ItemList[] GetTwoRandomItemsAdjusted()
     {
-        // ========================
-        // 1回目の抽選
-        // ========================
-        ItemList first = GetRandomItem(); // まず1つ目のアイテムをランダムで取得
+        // --- 1回目の抽選 ---
+        ItemList first = GetRandomItem();
 
-        // ========================
-        // 2回目の抽選用に確率を調整
-        // ========================
-        float reductionRate = 0.5f; // 1回目と同じアイテムの確率を50%に下げる
+        // --- 2回目の抽選用確率を調整 ---
+        float reductionRate = 0.5f; // 同一アイテムは確率を50%に減少
         List<ItemRateSystem> adjustedRates = new List<ItemRateSystem>();
 
         foreach (var irs in itemRateSystem)
         {
-            // 元のItemRateSystemをコピーして調整用リストを作成
+            // 元データをコピー
             ItemRateSystem newIRS = new ItemRateSystem
             {
                 Rate = irs.Rate,
@@ -89,97 +93,82 @@ public class ItemRate : MonoBehaviour
                 ItemIndex = irs.ItemIndex
             };
 
-            // もし1回目に選ばれたアイテムと同じなら確率を下げる
+            // もし1回目と同じアイテムなら確率を半減
             if (first != null && newIRS.ItemIndex == System.Array.IndexOf(item, first))
             {
-                newIRS.Rate *= reductionRate; // 確率を50%に減少
+                newIRS.Rate *= reductionRate;
             }
 
-            adjustedRates.Add(newIRS); // 調整済みのリストに追加
+            adjustedRates.Add(newIRS);
         }
 
-        // ========================
-        // 2回目の抽選
-        // ========================
+        // --- 調整後の確率で2回目の抽選 ---
         ItemList second = GetRandomItemWithCustomRates(adjustedRates);
-        // カスタム確率リストを使って2回目のアイテムを選ぶ
-        //ItemList third = GetRandomItem();
-        //ItemList fourth = GetRandomItem();
 
-        // ========================
-        // 結果をデバッグ出力
-        // ========================
         Debug.Log($"抽選結果 → 1つ目: {first?.ItemName}, 2つ目: {second?.ItemName}");
-
-        // 抽選結果を配列で返す
-        return new ItemList[] { first, second };//,third,fourth};
+        return new ItemList[] { first, second };
     }
 
-    // ========================
-    // カスタム確率でアイテムを抽選する関数
-    // ========================
+    /// <summary>
+    /// カスタム確率リストを使ってランダムアイテムを取得
+    /// </summary>
     private ItemList GetRandomItemWithCustomRates(List<ItemRateSystem> customRates)
     {
-        // 合計確率を計算
+        // 合計確率を算出
         float totalRate = 0f;
-        for (int i = 0; i < customRates.Count; i++)
-        {
-            totalRate += customRates[i].Rate;
-        }
+        foreach (var cr in customRates)
+            totalRate += cr.Rate;
 
-        // 0〜totalRateの間でランダムに値を決める
+        // ランダム値を生成
         float randomValue = Random.Range(0f, totalRate);
         float cumulativeRate = 0f;
 
-        // 累積確率でどのアイテムが選ばれるか決定
+        // 累積確率で抽選
         for (int i = 0; i < customRates.Count; i++)
         {
             cumulativeRate += customRates[i].Rate;
             if (randomValue <= cumulativeRate)
             {
                 int index = customRates[i].ItemIndex;
-
-                // インデックスが範囲内ならアイテムを返す
                 if (index < item.Length)
                     return item[index];
             }
         }
 
-        // 何も選ばれなかった場合はnullを返す
         return null;
     }
-    /*public ItemList[] GetTwoRandomitems() 
+
+    /*
+    // シンプルな2回抽選（確率調整なし）
+    public ItemList[] GetTwoRandomitems() 
     { 
         ItemList first = GetRandomItem(); 
         ItemList second = GetRandomItem(); 
         Debug.Log($"抽選結果 → 1つ目: {first?.ItemName}, 2つ目: {second?.ItemName}"); 
         return new ItemList[] { first, second }; 
-    }*/
-    // 条件付きでランダムアイテムを1つ生成し、プレイヤーに渡す
+    }
+    */
+
+    /// <summary>
+    /// 条件付きでランダムアイテムを1つ取得し、プレイヤーに配布
+    /// </summary>
     public ItemList[] conditionalaGetRandomItem(ItemDistributor distributor, bool isPlayer1)
     {
-        // --- アイテム選択前に一時的な状態をリセット ---
-        // （この関数が呼ばれるたびに新しく開始する）
-        ItemList selectedItem = null;
-
-        // --- ランダムで1つアイテムを取得（確率処理は GetRandomItem() に任せる）---
-        selectedItem = GetRandomItem();
+        ItemList selectedItem = GetRandomItem(); // ランダム抽選
 
         if (selectedItem != null)
         {
-            // --- 1つだけプレイヤーリストに追加 ---
+            // プレイヤー1 または 2 の手札に追加
             distributor.AddConditionalItem(selectedItem, isPlayer1);
 
-            // --- デバッグ出力 ---
-            Debug.Log($"プレイヤー{(isPlayer1 ? "1" : "2")}がアイテム「{selectedItem.ItemName}」を取得しました！");
+            Debug.Log($"🎁 プレイヤー{(isPlayer1 ? "1" : "2")}が「{selectedItem.ItemName}」を取得しました！");
         }
         else
         {
-            Debug.LogWarning("ランダムアイテムの取得に失敗しました。Rate設定を確認してください。");
+            Debug.LogWarning("⚠️ ランダムアイテムの取得に失敗しました。Rate設定を確認してください。");
         }
 
-        // --- 今回生成されたアイテムだけを返す ---
+        // 抽選結果を配列で返す
         return new ItemList[] { selectedItem };
     }
 }
-
