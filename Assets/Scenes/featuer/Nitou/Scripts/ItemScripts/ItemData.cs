@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "Scriptable Objects/ItemData")]
 public class ItemData : ScriptableObject
@@ -12,6 +13,9 @@ public class ItemData : ScriptableObject
     [Header("効果説明")]
     [TextArea]
     public string description;
+
+    [Header("アイテムのカード")]
+    public Sprite itemCards;
 
     [Header("排出率")]
     [Range(0f, 1f)]

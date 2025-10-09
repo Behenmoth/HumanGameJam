@@ -15,6 +15,7 @@ MonoBehaviour:
   itemName: "\u624B\u9320"
   itemID: 1
   description: "\u81EA\u5206\u306E\u30BF\u30FC\u30F3\u30921\u30BF\u30FC\u30F3\u98DB\u3070\u3059"
+  itemCards: {fileID: 21300000, guid: 523ba48c922599741989e310a1e0f5dd, type: 3}
   dropRate: 0.2
   spawnObj: {fileID: 3505125893436494184, guid: f64e13b5d194dbb4a81742148acd5e98, type: 3}
   spawnRotation: {x: -90, y: 0, z: 80}

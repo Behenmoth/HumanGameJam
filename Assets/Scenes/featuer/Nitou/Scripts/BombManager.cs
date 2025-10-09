@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class BombManager : MonoBehaviour
@@ -20,11 +21,14 @@ public class BombManager : MonoBehaviour
     public int maxBombClickCount;
     public int currentBombClickCount;
 
-    [Header("爆弾を叩くボタン")]
-    public Button bombClickButton;
-
     [Header("テキストUI")]
     public TMP_Text bombCountText;
+
+    [Header("クリック判定用カメラ")]
+    public Camera mainCamera;
+
+    [Header("名前入力画面")]
+    public GameObject nameInputObj;
 
     private void Awake()
     {
@@ -35,6 +39,44 @@ public class BombManager : MonoBehaviour
         else
         {
             Destroy(instance);
+        }
+
+        mainCamera = Camera.main;
+    }
+
+    //クリックしたときの処理
+    public void OnClickBomb(InputAction.CallbackContext callbackContext)
+    {
+        //押された時のみ実行する
+        if (!callbackContext.performed)
+        {
+            return;
+        }
+
+        //名前入力画面が出ているときは何もしない
+        if (nameInputObj != null && nameInputObj.activeSelf)
+        {
+            return;
+        }
+
+        //アイテムUIが出ているときは何もしない
+        if(ItemUIManager.instance != null && ItemUIManager.instance.itemUI.activeSelf)
+        {
+            return;
+        }
+
+        //クリックした場所にRayを飛ばす
+        Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+        //Rayが当たったら実行
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            //Rayが爆弾にヒットしていた時実行
+            if (hit.collider != null && hit.collider.gameObject == gameObject)
+            {
+                //設定したイベントを実行
+                BombClick();
+            }
         }
     }
 
@@ -65,15 +107,15 @@ public class BombManager : MonoBehaviour
     //爆弾のカウントを減らす
     public void BombClick()
     {
-        currentBombClickCount++;
         //爆弾を叩ける回数に上限を設ける
-        if (currentBombClickCount == maxBombClickCount)
+        if (currentBombClickCount >= maxBombClickCount)
         {
-            bombClickButton.interactable = false;
             Debug.Log("これ以上爆弾は叩けない");
+            return;
         }
 
         bombClicked = true;
+        currentBombClickCount++;
         currentBombCount--;
         Debug.Log("現在のカウント数は" + currentBombCount);
 
@@ -106,7 +148,6 @@ public class BombManager : MonoBehaviour
     public void ResetTrunBombClick()
     {
         currentBombClickCount = 0;
-        bombClickButton.interactable = true;
         bombClicked = false;
         Debug.Log("爆弾を叩いた数をリセットしました");
     }
