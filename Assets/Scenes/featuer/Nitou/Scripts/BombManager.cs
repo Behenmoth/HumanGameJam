@@ -10,9 +10,11 @@ public class BombManager : MonoBehaviour
     [Header("爆弾のカウント数")]
     public int bombCount;
     public int currentBombCount = 0;
+    public int halfBombCount;
 
-    [Header("爆弾を叩いたか")]
+    [Header("爆弾のbool")]
     public bool bombClicked = false;
+    public bool hasHalfBombCount = false;
 
     [Header("爆弾を叩く上限")]
     public int maxBombClickCount;
@@ -54,6 +56,9 @@ public class BombManager : MonoBehaviour
         bombCount = UnityEngine.Random.Range(20, 41);
         currentBombCount = bombCount;
 
+        //爆弾のカウントの半分の値を保存
+        halfBombCount = (bombCount % 2 == 0) ? bombCount / 2 : (bombCount - 1) / 2;
+
         UpdateBombCount();
     }
 
@@ -71,6 +76,13 @@ public class BombManager : MonoBehaviour
         bombClicked = true;
         currentBombCount--;
         Debug.Log("現在のカウント数は" + currentBombCount);
+
+        //カウントが半分になればアイテムを配布
+        if (!hasHalfBombCount && halfBombCount >= currentBombCount)
+        {
+            hasHalfBombCount = true;
+            GiveItemToCurrentPlayer();
+        }
 
         //カウントが0以下になれば爆発する
         if (currentBombCount <= 0)
@@ -97,6 +109,28 @@ public class BombManager : MonoBehaviour
         bombClickButton.interactable = true;
         bombClicked = false;
         Debug.Log("爆弾を叩いた数をリセットしました");
+    }
+
+    //半分以下になったターンのプレイヤーにアイテムを配布する処理
+    private void GiveItemToCurrentPlayer()
+    {
+        Debug.Log("爆弾のカウントが半分になった");
+
+        //現在のターンは取得
+        var currentTurn = GameManager.instance.currentPlayerTurn;
+        PlayerInventry targetInventry = null;
+
+        if (currentTurn == GameManager.PlayerTurn.Player1) 
+        {
+            targetInventry = GameManager.instance.player1Inventory;
+        }
+        else if (currentTurn == GameManager.PlayerTurn.Player2)
+        {
+            targetInventry = GameManager.instance.player2Inventory;
+        }
+
+        //アイテムを配布
+        ItemDistribution.instance.GiveRandomItems(targetInventry, 1);
     }
 
     //田中作
