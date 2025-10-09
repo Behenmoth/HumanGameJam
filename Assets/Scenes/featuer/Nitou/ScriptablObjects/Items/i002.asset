@@ -17,3 +17,4 @@ MonoBehaviour:
   description: "1\u30BF\u30FC\u30F3\u76F8\u624B\u306E\u7206\u5F3E\u3092\u53E9\u304F\u6570\u3092\u6307\u5B9A\u3059\u308B\uFF081\uFF5E3\u306E\u6570\u304B\u3089\u9078\u629E\uFF09"
   dropRate: 0.2
   spawnObj: {fileID: 4458647847228115246, guid: 53d4332ee2aed6b4bba43c7549c17a41, type: 3}
+  spawnRotation: {x: 0, y: -135, z: 0}

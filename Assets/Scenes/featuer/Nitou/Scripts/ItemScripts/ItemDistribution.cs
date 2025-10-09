@@ -24,17 +24,6 @@ public class ItemDistribution : MonoBehaviour
             Destroy(instance);
         }
     }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     //ラウンド開始時に2つアイテムを配る処理
     public void Distribution()
@@ -59,7 +48,7 @@ public class ItemDistribution : MonoBehaviour
     }
 
     //抽選されたアイテムをListに加える処理
-    private void GiveRandomItems(PlayerInventry inventry, int count)
+    public void GiveRandomItems(PlayerInventry inventry, int count)
     {
         //アイテムを配布する数だけ繰り返す
         for (int i = 0; i < count; i++)
