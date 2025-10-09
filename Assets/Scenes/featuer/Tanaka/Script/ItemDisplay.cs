@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class ItemDisplay : MonoBehaviour
 {
     // --- ItemDistributor（アイテム配布クラス）への参照 ---
-    [HideInInspector]
+    
     public ItemDistributor distributor;
 
     [Header("生成するImageプレハブ（Imageコンポーネントを持つUIプレハブ）")]
@@ -28,14 +28,6 @@ public class ItemDisplay : MonoBehaviour
 
     [Header("どのプレイヤーのアイテムを表示するか")]
     public PlayerTarget target = PlayerTarget.Player1;
-
-    // ===============================
-    // ✅ Distributor（アイテム配布管理）をセット
-    // ===============================
-    public void SetDistributor(ItemDistributor d)
-    {
-        distributor = d;
-    }
 
     // ===============================
     // ✅ 表示対象プレイヤーを切り替える
