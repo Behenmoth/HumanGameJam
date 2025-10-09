@@ -209,6 +209,9 @@ public class GameManager : MonoBehaviour
         //”š’e‚ğ’@‚¢‚½‰ñ”‚ğƒŠƒZƒbƒg
         BombManager.instance.ResetTrunBombClick();
 
+        ItemManager.instance.ResetUsedItems();
+
+
         UpdateTurnUI();
     }
 

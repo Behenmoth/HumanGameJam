@@ -7,10 +7,8 @@ public class WorldItemSpawner : MonoBehaviour
     public Transform[] spawnPoints;
 
     private Dictionary<Transform, GameObject> spawnedObjects = new Dictionary<Transform, GameObject>();
+    private int lastSpawnIndex = -1; // 最後に使用したインデックス
 
-    /// <summary>
-    /// 指定されたItemListのItemObjectを生成
-    /// </summary>
     public GameObject Spawn(ItemList item)
     {
         if (item == null || item.ItemObject == null)
@@ -19,7 +17,7 @@ public class WorldItemSpawner : MonoBehaviour
             return null;
         }
 
-        Transform spawn = GetAvailableSpawnPoint();
+        Transform spawn = GetNextAvailableSpawnPoint();
         if (spawn == null)
         {
             Debug.LogWarning($"全てのスポーンポイントが埋まっています。({item.ItemName})");
@@ -28,31 +26,32 @@ public class WorldItemSpawner : MonoBehaviour
 
         GameObject obj = Instantiate(item.ItemObject, spawn.position, Quaternion.identity);
         obj.name = $"World_{item.ItemName}";
-        spawnedObjects.Add(spawn, obj);
+        spawnedObjects[spawn] = obj;
+
         return obj;
     }
 
     /// <summary>
-    /// 現在の生成物をすべて削除
+    /// 空いているスポーンポイントを順番に探す
     /// </summary>
-    public void ClearAll()
+    private Transform GetNextAvailableSpawnPoint()
     {
-        foreach (var kv in spawnedObjects)
-        {
-            if (kv.Value != null)
-                Destroy(kv.Value);
-        }
-        spawnedObjects.Clear();
-    }
+        int startIndex = (lastSpawnIndex + 1) % spawnPoints.Length;
 
-    private Transform GetAvailableSpawnPoint()
-    {
-        foreach (var point in spawnPoints)
+        // spawnPointsを順にチェックして、空いている場所を探す
+        for (int i = 0; i < spawnPoints.Length; i++)
         {
-            if (!spawnedObjects.ContainsKey(point))
+            int index = (startIndex + i) % spawnPoints.Length;
+            Transform point = spawnPoints[index];
+
+            if (!spawnedObjects.ContainsKey(point) || spawnedObjects[point] == null)
+            {
+                lastSpawnIndex = index;
                 return point;
+            }
         }
-        return null;
+
+        return null; // 全て埋まっている
     }
 
     /// <summary>
@@ -63,7 +62,6 @@ public class WorldItemSpawner : MonoBehaviour
         if (item == null)
             return;
 
-        // 名前に ItemName が含まれている生成物を探す
         Transform targetKey = null;
 
         foreach (var kv in spawnedObjects)
@@ -81,4 +79,14 @@ public class WorldItemSpawner : MonoBehaviour
             spawnedObjects.Remove(targetKey);
     }
 
+    public void ClearAll()
+    {
+        foreach (var kv in spawnedObjects)
+        {
+            if (kv.Value != null)
+                Destroy(kv.Value);
+        }
+        spawnedObjects.Clear();
+        lastSpawnIndex = -1; // リセット
+    }
 }

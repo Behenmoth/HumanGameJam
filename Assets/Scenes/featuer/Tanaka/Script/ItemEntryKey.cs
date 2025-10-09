@@ -14,6 +14,7 @@ public class ItemEntryKey : MonoBehaviour
         // 新Input Systemの場合は Keyboard.current を使う
         if (Keyboard.current.enterKey.wasPressedThisFrame)
         {
+            isPlayer1 = false;
             Debug.Log("Enterキー（Input System）が押されました！");
             itemRateSystemScript.conditionalaGetRandomItem(itemDistributor, isPlayer1);
 

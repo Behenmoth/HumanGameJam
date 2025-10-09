@@ -8,6 +8,9 @@ public class ItemList : ScriptableObject
     //[InspectorLabel("アイテムアイコン")]
     //public Sprite ItemIcon;
 
+    [Header("アイテムID")]
+    public int ItemID;
+
     [Header("アイテム名")]
     public string ItemName;
 
@@ -16,4 +19,5 @@ public class ItemList : ScriptableObject
 
     [Header("アイテムオブジェクト")]
     public GameObject ItemObject;
+
 }

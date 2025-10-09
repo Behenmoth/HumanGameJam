@@ -16,9 +16,7 @@ public class ItemDisplay : MonoBehaviour
     [Header("ワールドアイテム生成管理")]
     public WorldItemSpawner spawner;
 
-
     private Dictionary<Transform, GameObject> spawnedObjects = new Dictionary<Transform, GameObject>();
-
 
     public enum PlayerTarget { Player1, Player2 }
 
@@ -45,7 +43,6 @@ public class ItemDisplay : MonoBehaviour
             return;
         }
 
-        // List<ItemList> に対応
         var items = (target == PlayerTarget.Player1)
             ? distributor.player1Items
             : distributor.player2Items;
@@ -74,7 +71,7 @@ public class ItemDisplay : MonoBehaviour
             Destroy(itemParent.GetChild(i).gameObject);
         }
 
-        //// --- 新しいアイテムを生成 ---
+        // --- 新しいアイテムを生成 ---
         for (int i = 0; i < items.Count; i++)
         {
             var itemData = items[i];
@@ -96,20 +93,19 @@ public class ItemDisplay : MonoBehaviour
             GameObject spawnedObj = null;
             if (spawner != null)
             {
-                spawnedObj = spawner.Spawn(itemData); // 戻り値を受け取る
+                spawnedObj = spawner.Spawn(itemData);
             }
 
-            // ✅ 紐付けを登録
             spawnedObjects[uiObj.transform] = spawnedObj;
 
-            // ✅ 削除機能を追加（Objectも削除）
-            AddClickToDestroy(uiObj, itemData, isPlayer1);
+            // ✅ ボタンイベント登録
+            AddClickHandler(uiObj, itemData, isPlayer1);
         }
 
         Debug.Log($"[{name}] {items.Count} 件のアイテムを生成しました (target={target})", this);
     }
 
-    private void AddClickToDestroy(GameObject obj, ItemList item, bool isPlayer1)
+    private void AddClickHandler(GameObject obj, ItemList item, bool isPlayer1)
     {
         Button btn = obj.GetComponent<Button>();
         if (btn == null)
@@ -117,27 +113,74 @@ public class ItemDisplay : MonoBehaviour
 
         btn.onClick.AddListener(() =>
         {
-            // 🎯 対応する3Dオブジェクトを削除
-            if (spawnedObjects.ContainsKey(obj.transform))
+            if (ItemManager.instance == null)
+                return;
+
+            // 🎯 アイテム効果を実行
+            bool canDelete = ItemManager.instance.UseItem(item.ItemID);
+
+            // 🎯 即削除可能なアイテムのみ削除
+            if (canDelete)
             {
-                var linkedObj = spawnedObjects[obj.transform];
-                if (linkedObj != null)
-                    Destroy(linkedObj);
-
-                spawnedObjects.Remove(obj.transform);
+                RemoveItem(obj, item, isPlayer1);
             }
-
-            // UIを削除
-            Destroy(obj);
-
-            // リストから削除
-            var targetList = isPlayer1 ? distributor.player1Items : distributor.player2Items;
-            if (targetList.Contains(item))
-                targetList.Remove(item);
-
-            // 表示更新
-            distributor.UpdateAllDisplays();
+            else
+            {
+                Debug.Log($"アイテム「{item.ItemName}」は選択が必要です。削除を保留します。");
+                // 💉や📺は UI操作完了後に ItemManager 側から RemoveItem() を呼ぶ
+            }
         });
     }
 
+    // 1つのアイテムだけUI＋Object生成する専用メソッド
+    public void GenerateSingleItemUIAndObject(ItemList itemData, bool isPlayer1)
+    {
+        if (itemData == null) return; 
+        // ✅ UI生成
+        GameObject uiObj = Instantiate(itemImagePrefab, itemParent); Image img = uiObj.GetComponent<Image>(); if (img != null) { img.sprite = itemData.ItemImage; uiObj.name = $"Item_{itemData.ItemName}"; } 
+        // ✅ Object生成
+        GameObject spawnedObj = null; if (spawner != null) { spawnedObj = spawner.Spawn(itemData); } 
+        // 紐付け登録
+        spawnedObjects[uiObj.transform] = spawnedObj;
+        // 削除イベント登録
+        AddClickHandler(uiObj, itemData, isPlayer1);
+        Debug.Log($"[{name}] 新アイテム {itemData.ItemName} のUIとObjectを生成しました"); 
+    }
+    // --- 共通削除処理 ---
+    public void RemoveItem(GameObject obj, ItemList item, bool isPlayer1)
+    {
+        if (spawner != null)
+            spawner.RemoveItem(item);
+
+        Destroy(obj);
+
+        var targetList = isPlayer1 ? distributor.player1Items : distributor.player2Items;
+        if (targetList.Contains(item))
+            targetList.Remove(item);
+
+        Debug.Log($"アイテム「{item.ItemName}」を削除しました。");
+    }
+
+    // --- 外部（ItemManager）からも呼べるように ---
+    public static ItemDisplay currentDisplay;
+
+    private void Awake()
+    {
+        currentDisplay = this;
+    }
+
+    public static void RemoveItemFromUI(ItemList item)
+    {
+        if (currentDisplay == null) return;
+
+        // itemParent 内の対象UIを探して削除
+        foreach (Transform child in currentDisplay.itemParent)
+        {
+            if (child.name.Contains(item.ItemName))
+            {
+                currentDisplay.RemoveItem(child.gameObject, item, currentDisplay.target == PlayerTarget.Player1);
+                break;
+            }
+        }
+    }
 }

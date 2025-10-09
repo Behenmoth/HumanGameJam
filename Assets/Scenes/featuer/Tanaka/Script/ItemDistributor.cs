@@ -1,15 +1,16 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 public class ItemDistributor : MonoBehaviour
 {
     [SerializeField] private ItemRate itemRateSystemScript;
 
-    // ƒvƒŒƒCƒ„[‚²‚Æ‚ÌƒAƒCƒeƒ€Œ‹‰Ê‚ğŠi”[iÅ‘å4‚Âj
+    // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã”ã¨ã®ã‚¢ã‚¤ãƒ†ãƒ çµæœã‚’æ ¼ç´ï¼ˆæœ€å¤§4ã¤ï¼‰
     public List<ItemList> player1Items = new List<ItemList>();
     public List<ItemList> player2Items = new List<ItemList>();
+    [SerializeField] private WorldItemSpawner worldSpawner; // â† è¿½åŠ ï¼
 
-    // ItemDisplay‚ğ•¡”‚Â
+    // ItemDisplayã‚’è¤‡æ•°æŒã¤
     public List<ItemDisplay> itemDisplays = new List<ItemDisplay>();
 
     private const int MaxItems = 4;
@@ -22,25 +23,25 @@ public class ItemDistributor : MonoBehaviour
     public void DistributeItems()
     {
         // ========================
-        // ƒvƒŒƒCƒ„[1‚É2‚Â‚ÌƒAƒCƒeƒ€‚ğ”z‚é
+        // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼1ã«2ã¤ã®ã‚¢ã‚¤ãƒ†ãƒ ã‚’é…ã‚‹
         // ========================
         var newItems1 = itemRateSystemScript.GetTwoRandomItemsAdjusted();
         AddItemsWithLimit(player1Items, newItems1);
 
         // ========================
-        // ƒvƒŒƒCƒ„[2‚É2‚Â‚ÌƒAƒCƒeƒ€‚ğ”z‚é
+        // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼2ã«2ã¤ã®ã‚¢ã‚¤ãƒ†ãƒ ã‚’é…ã‚‹
         // ========================
         var newItems2 = itemRateSystemScript.GetTwoRandomItemsAdjusted();
         AddItemsWithLimit(player2Items, newItems2);
 
         // ========================
-        // Œ‹‰Ê‚ğƒfƒoƒbƒOo—Í
+        // çµæœã‚’ãƒ‡ãƒãƒƒã‚°å‡ºåŠ›
         // ========================
-        Debug.Log($"ƒvƒŒƒCƒ„[1 ¨ {string.Join(", ", player1Items.ConvertAll(i => i.ItemName))}");
-        Debug.Log($"ƒvƒŒƒCƒ„[2 ¨ {string.Join(", ", player2Items.ConvertAll(i => i.ItemName))}");
+        Debug.Log($"ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼1 â†’ {string.Join(", ", player1Items.ConvertAll(i => i.ItemName))}");
+        Debug.Log($"ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼2 â†’ {string.Join(", ", player2Items.ConvertAll(i => i.ItemName))}");
 
         // ========================
-        // Še ItemDisplay ‚ğXV
+        // å„ ItemDisplay ã‚’æ›´æ–°
         // ========================
 
         UpdateAllDisplays();
@@ -54,17 +55,26 @@ public class ItemDistributor : MonoBehaviour
 
         if (targetList.Count < MaxItems)
         {
-            // ‚Ü‚¾4ŒÂ–¢–‚È‚ç’Ç‰Á
             targetList.Add(item);
-            Debug.Log($"ƒAƒCƒeƒ€u{item.ItemName}v‚ğ’Ç‰Á‚µ‚Ü‚µ‚½BŒ»İ‚ÌŠ”F{targetList.Count}");
+            Debug.Log($"ã‚¢ã‚¤ãƒ†ãƒ ã€Œ{item.ItemName}ã€ã‚’è¿½åŠ ã—ã¾ã—ãŸã€‚ç¾åœ¨ã®æ‰€æŒæ•°ï¼š{targetList.Count}");
+
+            // âœ… UI + Object åŒæ™‚ç”Ÿæˆ
+            foreach (var display in itemDisplays)
+            {
+                if (display == null) continue;
+
+                // å¯¾è±¡ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®Displayã ã‘æ›´æ–°
+                if ((isPlayer1 && display.target == ItemDisplay.PlayerTarget.Player1) ||
+                    (!isPlayer1 && display.target == ItemDisplay.PlayerTarget.Player2))
+                {
+                    display.GenerateSingleItemUIAndObject(item, isPlayer1);
+                }
+            }
         }
         else
         {
-            // 4ŒÂ‚·‚Å‚É‚ ‚éê‡ ¨ V‚µ‚¢ƒAƒCƒeƒ€‚Í”jŠü
-            Debug.Log($"ƒAƒCƒeƒ€u{item.ItemName}v‚Í’Ç‰Á‚Å‚«‚Ü‚¹‚ñBãŒÀi{MaxItems}ŒÂj‚É’B‚µ‚Ä‚¢‚é‚½‚ß”jŠü‚µ‚Ü‚µ‚½B");
+            Debug.Log($"ã‚¢ã‚¤ãƒ†ãƒ ã€Œ{item.ItemName}ã€ã¯è¿½åŠ ã§ãã¾ã›ã‚“ã€‚ä¸Šé™({MaxItems})ã«é”ã—ã¦ã„ã¾ã™ã€‚");
         }
-
-        UpdateAllDisplays();
     }
 
     private void AddItemsWithLimit(List<ItemList> targetList, ItemList[] newItems)
@@ -73,13 +83,13 @@ public class ItemDistributor : MonoBehaviour
         {
             if (targetList.Count < MaxItems)
             {
-                targetList.Add(item); // 4–¢–‚È‚ç’Ç‰Á
-                Debug.Log($"ƒAƒCƒeƒ€u{item.ItemName}v‚ğ’Ç‰Á‚µ‚Ü‚µ‚½B");
+                targetList.Add(item); // 4æœªæº€ãªã‚‰è¿½åŠ 
+                Debug.Log($"ã‚¢ã‚¤ãƒ†ãƒ ã€Œ{item.ItemName}ã€ã‚’è¿½åŠ ã—ã¾ã—ãŸã€‚");
             }
             else
             {
-                // ‚·‚Å‚É4‚Â‚ ‚éê‡‚ÍV‚µ‚¢ƒAƒCƒeƒ€‚ğ”jŠü
-                Debug.Log($"5ŒÂ–Ú‚ÌƒAƒCƒeƒ€u{item.ItemName}v‚ÍãŒÀ‚Ì‚½‚ß”jŠü‚³‚ê‚Ü‚µ‚½B");
+                // ã™ã§ã«4ã¤ã‚ã‚‹å ´åˆã¯æ–°ã—ã„ã‚¢ã‚¤ãƒ†ãƒ ã‚’ç ´æ£„
+                Debug.Log($"5å€‹ç›®ã®ã‚¢ã‚¤ãƒ†ãƒ ã€Œ{item.ItemName}ã€ã¯ä¸Šé™ã®ãŸã‚ç ´æ£„ã•ã‚Œã¾ã—ãŸã€‚");
             }
         }
     }
