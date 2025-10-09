@@ -27,6 +27,10 @@ public class GameManager : MonoBehaviour
     [Header("アイテム使用の可否")]
     public bool canUseItems = false;
 
+    [Header("プレイヤーの名前")]
+    string player1name = "Player1";
+    string player2name = "Player2";
+
     //爆弾の所持状況
     public enum BombHolder {None,Player1,Player2}
 
@@ -69,7 +73,6 @@ public class GameManager : MonoBehaviour
         UnityEngine.Random.InitState(DateTime.Now.Millisecond);
 
         currentRoundCount = 0;
-        RoundManager();
     }
 
     // Update is called once per frame
@@ -79,7 +82,7 @@ public class GameManager : MonoBehaviour
     }
 
     //ラウンドを管理する処理
-    private void RoundManager()
+    public void RoundManager()
     {
         if (currentRoundCount >= roundCount)
         {
@@ -89,12 +92,12 @@ public class GameManager : MonoBehaviour
 
         if (player1WinCount >= winCount)
         {
-            Debug.Log("プレイヤー1");
+            Debug.Log($"{player1name}");
         }
 
         if (player2WinCount >= winCount)
         {
-            Debug.Log("プレイヤー2");
+            Debug.Log($"{player1name}");
         }
 
         currentRoundCount++;
@@ -115,6 +118,11 @@ public class GameManager : MonoBehaviour
 
         //現在のターンを表示
         UpdateTurnUI();
+
+        //タイマーをリセットする
+        CountDownTimer.instance.ResetCountDownTimer();
+        //タイマーのカウントダウン開始
+        CountDownTimer.instance.StartCountDownTimer();
     }
 
     //アイテムを各プレイヤーに配る処理
@@ -137,14 +145,14 @@ public class GameManager : MonoBehaviour
             //プレイヤー1に爆弾を持たせる
             currentBombholder = BombHolder.Player1;
             currentPlayerTurn = PlayerTurn.Player1;
-            Debug.Log("最初はプレイヤー1");
+            Debug.Log($"最初は{player1name}");
         }
         else
         {
             //プレイヤー2に爆弾を持たせる
             currentBombholder = BombHolder.Player2;
             currentPlayerTurn = PlayerTurn.Player2;
-            Debug.Log("最初はプレイヤー2");
+            Debug.Log($"最初は{player2name}");
         }
 
         UpdateTurnUI();
@@ -156,12 +164,12 @@ public class GameManager : MonoBehaviour
         if (currentBombholder == BombHolder.Player1)
         {
             currentBombholder = BombHolder.Player2;
-            Debug.Log("プレイヤー1からプレイヤー2へ爆弾を渡した");
+            Debug.Log($"{player1name}から{player2name}へ爆弾を渡した");
         }
         else if (currentBombholder == BombHolder.Player2) 
         {
             currentBombholder = BombHolder.Player1;
-            Debug.Log("プレイヤー2からプレイヤー1へ爆弾を渡した");
+            Debug.Log($"{player2name}から{player1name}へ爆弾を渡した");
         }
     }
 
@@ -195,17 +203,24 @@ public class GameManager : MonoBehaviour
         {
             currentPlayerTurn = PlayerTurn.Player2;
             PassBomb();
-            Debug.Log("プレイヤー1からプレイヤー2へターンを渡した");
+
+            Debug.Log($"{player1name}から{player2name}へターンを渡した");
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
         {
             currentPlayerTurn = PlayerTurn.Player1;
             PassBomb();
-            Debug.Log("プレイヤー2からプレイヤー1へターンを渡した");
+
+            Debug.Log($"{player2name}から{player1name}へターンを渡した");
         }
 
         //爆弾を叩いた回数をリセット
         BombManager.instance.ResetTrunBombClick();
+
+        //タイマーをリセットする
+        CountDownTimer.instance.ResetCountDownTimer();
+        //タイマーのカウントダウン開始
+        CountDownTimer.instance.StartCountDownTimer();
 
         UpdateTurnUI();
     }
@@ -217,7 +232,7 @@ public class GameManager : MonoBehaviour
         {
             Player2Win();
         }
-        if (currentPlayerTurn == PlayerTurn.Player2)
+        else if (currentPlayerTurn == PlayerTurn.Player2)
         {
             Player1Win();
         }
@@ -226,7 +241,7 @@ public class GameManager : MonoBehaviour
     //プレイヤー1が勝利したときの処理
     private void Player1Win()
     {
-        Debug.Log("プレイヤー1が勝利しました");
+        Debug.Log($"{player1name}が勝利しました");
         player1WinCount++;
 
         RoundManager();
@@ -235,7 +250,7 @@ public class GameManager : MonoBehaviour
     //プレイヤー2が勝利したときの処理
     private void Player2Win()
     {
-        Debug.Log("プレイヤー2が勝利しました");
+        Debug.Log($"{player2name}が勝利しました");
         player2WinCount++;
 
         RoundManager();
@@ -244,6 +259,23 @@ public class GameManager : MonoBehaviour
     //現在のターンを表示
     private void UpdateTurnUI()
     {
-        turnText.text = $"{currentPlayerTurn}";
+        if (currentPlayerTurn == PlayerTurn.Player1)
+        {
+            turnText.text = $"{player1name}";
+        }
+        else if (currentPlayerTurn == PlayerTurn.Player2)
+        {
+            turnText.text = $"{player2name}";
+        }
+        
+    }
+
+    //入力した名前を反映させる処理
+    public void SetPlayerNames(string name1, string name2)
+    {
+        player1name = name1;
+        player2name = name2;
+
+        UpdateTurnUI();
     }
 }
