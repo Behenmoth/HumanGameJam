@@ -19,4 +19,7 @@ public class ItemData : ScriptableObject
 
     [Header("生成するオブジェクト")]
     public GameObject spawnObj;
+
+    [Header("オブジェクトの角度")]
+    public Vector3 spawnRotation;
 }

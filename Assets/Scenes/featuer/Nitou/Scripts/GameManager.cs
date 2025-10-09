@@ -31,12 +31,15 @@ public class GameManager : MonoBehaviour
 
     [Header("ターン")]
     public PlayerTurn currentPlayerTurn = PlayerTurn.None;
-    public bool isPlayer1 = false;
 
     [Header("ラウンド数")]
     public int roundCount;
     public int currentRoundCount;
     public int winCount;
+
+    [Header("各プレイヤーのインベントリー")]
+    public PlayerInventry player1Inventory;
+    public PlayerInventry player2Inventory;
 
     [Header("ボタン")]
     public Button nextTurnButton;
@@ -75,20 +78,16 @@ public class GameManager : MonoBehaviour
     //ラウンドを管理する処理
     public void RoundManager()
     {
-        if (currentRoundCount >= roundCount)
-        {
-            Debug.Log("全ラウンド終了");
-            return;
-        }
-
         if (player1WinCount >= winCount)
         {
             Debug.Log($"{player1name}");
+            return;
         }
 
         if (player2WinCount >= winCount)
         {
-            Debug.Log($"{player1name}");
+            Debug.Log($"{player2name}");
+            return;
         }
 
         currentRoundCount++;
@@ -98,11 +97,15 @@ public class GameManager : MonoBehaviour
             roundText.text = $"Round {currentRoundCount}";
         }
 
-
-        //アイテムを各プレイヤーに配る
-
         //どちらかのプレイヤーに爆弾を渡す
         GiveBombs();
+
+        //アイテムを各プレイヤーに配る
+        ItemDistribution.instance.Distribution();
+
+        //表示するアイテムを切り替え
+        player1Inventory.SetActiveObjects(currentPlayerTurn);
+        player2Inventory.SetActiveObjects(currentPlayerTurn);
 
         if (BombManager.instance != null)
         {
@@ -142,7 +145,6 @@ public class GameManager : MonoBehaviour
         {
             //プレイヤー1に爆弾を持たせる
             currentBombholder = BombHolder.Player1;
-            isPlayer1 = true;
 
             currentPlayerTurn = PlayerTurn.Player1;
             Debug.Log($"最初は{player1name}");
@@ -151,7 +153,6 @@ public class GameManager : MonoBehaviour
         {
             //プレイヤー2に爆弾を持たせる
             currentBombholder = BombHolder.Player2;
-            isPlayer1 = false;
 
             currentPlayerTurn = PlayerTurn.Player2;
             Debug.Log($"最初は{player2name}");
@@ -226,7 +227,6 @@ public class GameManager : MonoBehaviour
             BombManager.instance.ResetTrunBombClick();
         }
 
-        //ItemManager.instance.ResetUsedItems();
 
         if (CountDownTimer.instance != null)
         {
@@ -237,6 +237,10 @@ public class GameManager : MonoBehaviour
         }
 
         UpdateTurnUI();
+
+        //表示するアイテムを切り替え
+        player1Inventory.SetActiveObjects(currentPlayerTurn);
+        player2Inventory.SetActiveObjects(currentPlayerTurn);
     }
 
     //GameOver時の処理

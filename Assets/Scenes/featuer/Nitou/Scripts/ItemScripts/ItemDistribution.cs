@@ -54,6 +54,8 @@ public class ItemDistribution : MonoBehaviour
         }
 
         //アイテムをランダムに抽選
+        GiveRandomItems(player1Inventry, 2);
+        GiveRandomItems(player2Inventry, 2);
     }
 
     //抽選されたアイテムをListに加える処理
@@ -107,7 +109,7 @@ public class ItemDistribution : MonoBehaviour
             return;
         }
 
-        player1Inventry.SetActiveObjects(currentTurn == GameManager.PlayerTurn.Player1);
-        player2Inventry.SetActiveObjects(currentTurn == GameManager.PlayerTurn.Player2);
+        player1Inventry.SetActiveObjects(currentTurn);
+        player2Inventry.SetActiveObjects(currentTurn);
     }
 }
