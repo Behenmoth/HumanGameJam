@@ -13,17 +13,6 @@ public class GameManager : MonoBehaviour
     public int player1WinCount;
     public int player2WinCount;
 
-    [Header("アイテムのインベントリー")]
-    public List<int> player1ItemIdList = new List<int>();
-    public List<int> player1ItemAmountList = new List<int>();
-
-    public List<int> player2ItemIdList = new List<int>();
-    public List<int> player2ItemAmountList = new List<int>();
-
-    [Header("アイテム")]
-    public int maxItem;
-    public int giveItem;
-
     [Header("アイテム使用の可否")]
     public bool canUseItems = false;
 
@@ -42,6 +31,7 @@ public class GameManager : MonoBehaviour
 
     [Header("ターン")]
     public PlayerTurn currentPlayerTurn = PlayerTurn.None;
+    public bool isPlayer1 = false;
 
     [Header("ラウンド数")]
     public int roundCount;
@@ -105,7 +95,7 @@ public class GameManager : MonoBehaviour
         roundText.text = $"Round {currentRoundCount}";
 
         //アイテムを各プレイヤーに配る
-        GiveItems();
+        ItemDistributor.instance.DistributeItems();
 
         //どちらかのプレイヤーに爆弾を渡す
         GiveBombs();
@@ -125,16 +115,6 @@ public class GameManager : MonoBehaviour
         CountDownTimer.instance.StartCountDownTimer();
     }
 
-    //アイテムを各プレイヤーに配る処理
-    private void GiveItems()
-    {
-        for(int i = 0; i < giveItem; i++)
-        {
-
-        }
-        Debug.Log("アイテムを配った");
-    }
-
     //どちらかのプレイヤーに爆弾を渡す処理
     private void GiveBombs()
     {
@@ -144,6 +124,8 @@ public class GameManager : MonoBehaviour
         {
             //プレイヤー1に爆弾を持たせる
             currentBombholder = BombHolder.Player1;
+            isPlayer1 = true;
+
             currentPlayerTurn = PlayerTurn.Player1;
             Debug.Log($"最初は{player1name}");
         }
@@ -151,6 +133,8 @@ public class GameManager : MonoBehaviour
         {
             //プレイヤー2に爆弾を持たせる
             currentBombholder = BombHolder.Player2;
+            isPlayer1 = false;
+
             currentPlayerTurn = PlayerTurn.Player2;
             Debug.Log($"最初は{player2name}");
         }
@@ -203,6 +187,10 @@ public class GameManager : MonoBehaviour
         {
             currentPlayerTurn = PlayerTurn.Player2;
             PassBomb();
+
+            //プレイヤーアイテム切り替える
+            Debug.Log("プレイヤーのアイテムを切り替えた");
+            ItemDisplay.instance.SetPlayerTarget(ItemDisplay.PlayerTarget.Player2);//ItemRate.instance.conditionalaGetRandomItem(ItemDistributor.instance, isPlayer1);
             
             Debug.Log($"{player1name}から{player2name}へターンを渡した");
 
@@ -212,6 +200,10 @@ public class GameManager : MonoBehaviour
             currentPlayerTurn = PlayerTurn.Player1;
             PassBomb();
 
+            //プレイヤーアイテム切り替える
+            Debug.Log("プレイヤーのアイテムを切り替えた");
+            ItemDisplay.instance.SetPlayerTarget(ItemDisplay.PlayerTarget.Player1);//ItemRate.instance.conditionalaGetRandomItem(ItemDistributor.instance, isPlayer1);
+
             Debug.Log($"{player2name}から{player1name}へターンを渡した");
 
         }
@@ -219,7 +211,7 @@ public class GameManager : MonoBehaviour
         //爆弾を叩いた回数をリセット
         BombManager.instance.ResetTrunBombClick();
 
-        ItemManager.instance.ResetUsedItems();
+        //ItemManager.instance.ResetUsedItems();
 
         //タイマーをリセットする
         CountDownTimer.instance.ResetCountDownTimer();
