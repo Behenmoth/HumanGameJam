@@ -9,45 +9,49 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    [Header("ƒvƒŒƒCƒ„[‚ÌŸ—˜”")]
+    [Header("ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å‹åˆ©æ•°")]
     public int player1WinCount;
     public int player2WinCount;
 
-    [Header("ƒAƒCƒeƒ€‚ÌƒCƒ“ƒxƒ“ƒgƒŠ[")]
+    [Header("ã‚¢ã‚¤ãƒ†ãƒ ã®ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªãƒ¼")]
     public List<int> player1ItemIdList = new List<int>();
     public List<int> player1ItemAmountList = new List<int>();
 
     public List<int> player2ItemIdList = new List<int>();
     public List<int> player2ItemAmountList = new List<int>();
 
-    [Header("ƒAƒCƒeƒ€")]
+    [Header("ã‚¢ã‚¤ãƒ†ãƒ ")]
     public int maxItem;
     public int giveItem;
 
-    [Header("ƒAƒCƒeƒ€g—p‚Ì‰Â”Û")]
+    [Header("ã‚¢ã‚¤ãƒ†ãƒ ä½¿ç”¨ã®å¯å¦")]
     public bool canUseItems = false;
 
-    //”š’e‚ÌŠó‹µ
+    [Header("ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®åå‰")]
+    string player1name = "Player1";
+    string player2name = "Player2";
+
+    //çˆ†å¼¾ã®æ‰€æŒçŠ¶æ³
     public enum BombHolder {None,Player1,Player2}
 
-    //ƒvƒŒƒCƒ„[‚Ìƒ^[ƒ“
+    //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ã‚¿ãƒ¼ãƒ³
     public enum PlayerTurn {None,Player1,Player2}
 
-    [Header("”š’e•Û")]
+    [Header("çˆ†å¼¾ä¿æŒ")]
     public BombHolder currentBombholder = BombHolder.None;
 
-    [Header("ƒ^[ƒ“")]
+    [Header("ã‚¿ãƒ¼ãƒ³")]
     public PlayerTurn currentPlayerTurn = PlayerTurn.None;
 
-    [Header("ƒ‰ƒEƒ“ƒh”")]
+    [Header("ãƒ©ã‚¦ãƒ³ãƒ‰æ•°")]
     public int roundCount;
     public int currentRoundCount;
     public int winCount;
 
-    [Header("ƒ{ƒ^ƒ“")]
+    [Header("ãƒœã‚¿ãƒ³")]
     public Button nextTurnButton;
 
-    [Header("ƒeƒLƒXƒgUI")]
+    [Header("ãƒ†ã‚­ã‚¹ãƒˆUI")]
     public TMP_Text roundText;
     public TMP_Text turnText;
 
@@ -69,7 +73,6 @@ public class GameManager : MonoBehaviour
         UnityEngine.Random.InitState(DateTime.Now.Millisecond);
 
         currentRoundCount = 0;
-        RoundManager();
     }
 
     // Update is called once per frame
@@ -78,108 +81,113 @@ public class GameManager : MonoBehaviour
         TurnManager();
     }
 
-    //ƒ‰ƒEƒ“ƒh‚ğŠÇ—‚·‚éˆ—
-    private void RoundManager()
+    //ãƒ©ã‚¦ãƒ³ãƒ‰ã‚’ç®¡ç†ã™ã‚‹å‡¦ç†
+    public void RoundManager()
     {
         if (currentRoundCount >= roundCount)
         {
-            Debug.Log("‘Sƒ‰ƒEƒ“ƒhI—¹");
+            Debug.Log("å…¨ãƒ©ã‚¦ãƒ³ãƒ‰çµ‚äº†");
             return;
         }
 
         if (player1WinCount >= winCount)
         {
-            Debug.Log("ƒvƒŒƒCƒ„[1");
+            Debug.Log($"{player1name}");
         }
 
         if (player2WinCount >= winCount)
         {
-            Debug.Log("ƒvƒŒƒCƒ„[2");
+            Debug.Log($"{player1name}");
         }
 
         currentRoundCount++;
 
         roundText.text = $"Round {currentRoundCount}";
 
-        //ƒAƒCƒeƒ€‚ğŠeƒvƒŒƒCƒ„[‚É”z‚é
+        //ã‚¢ã‚¤ãƒ†ãƒ ã‚’å„ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«é…ã‚‹
         GiveItems();
 
-        //‚Ç‚¿‚ç‚©‚ÌƒvƒŒƒCƒ„[‚É”š’e‚ğ“n‚·
+        //ã©ã¡ã‚‰ã‹ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«çˆ†å¼¾ã‚’æ¸¡ã™
         GiveBombs();
 
-        //”š’e‚ÌƒJƒEƒ“ƒg‚ğƒ‰ƒ“ƒ_ƒ€‚ÅŒˆ‚ß‚é
+        //çˆ†å¼¾ã®ã‚«ã‚¦ãƒ³ãƒˆã‚’ãƒ©ãƒ³ãƒ€ãƒ ã§æ±ºã‚ã‚‹
         BombManager.instance.StartBombCount();
 
-        //’@‚¢‚½ƒJƒEƒ“ƒg‚ğƒŠƒZƒbƒg‚·‚é
+        //å©ã„ãŸã‚«ã‚¦ãƒ³ãƒˆã‚’ãƒªã‚»ãƒƒãƒˆã™ã‚‹
         BombManager.instance.ResetTrunBombClick();
 
-        //Œ»İ‚Ìƒ^[ƒ“‚ğ•\¦
+        //ç¾åœ¨ã®ã‚¿ãƒ¼ãƒ³ã‚’è¡¨ç¤º
         UpdateTurnUI();
+
+        //ã‚¿ã‚¤ãƒãƒ¼ã‚’ãƒªã‚»ãƒƒãƒˆã™ã‚‹
+        CountDownTimer.instance.ResetCountDownTimer();
+        //ã‚¿ã‚¤ãƒãƒ¼ã®ã‚«ã‚¦ãƒ³ãƒˆãƒ€ã‚¦ãƒ³é–‹å§‹
+        CountDownTimer.instance.StartCountDownTimer();
     }
 
-    //ƒAƒCƒeƒ€‚ğŠeƒvƒŒƒCƒ„[‚É”z‚éˆ—
+    //ã‚¢ã‚¤ãƒ†ãƒ ã‚’å„ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«é…ã‚‹å‡¦ç†
     private void GiveItems()
     {
         for(int i = 0; i < giveItem; i++)
         {
 
         }
-        Debug.Log("ƒAƒCƒeƒ€‚ğ”z‚Á‚½");
+        Debug.Log("ã‚¢ã‚¤ãƒ†ãƒ ã‚’é…ã£ãŸ");
     }
 
-    //‚Ç‚¿‚ç‚©‚ÌƒvƒŒƒCƒ„[‚É”š’e‚ğ“n‚·ˆ—
+    //ã©ã¡ã‚‰ã‹ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«çˆ†å¼¾ã‚’æ¸¡ã™å‡¦ç†
     private void GiveBombs()
     {
         int randomPlayer = UnityEngine.Random.Range(1, 3);
 
         if (randomPlayer == 1)
         {
-            //ƒvƒŒƒCƒ„[1‚É”š’e‚ğ‚½‚¹‚é
+            //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼1ã«çˆ†å¼¾ã‚’æŒãŸã›ã‚‹
             currentBombholder = BombHolder.Player1;
             currentPlayerTurn = PlayerTurn.Player1;
-            Debug.Log("Å‰‚ÍƒvƒŒƒCƒ„[1");
+            Debug.Log($"æœ€åˆã¯{player1name}");
         }
         else
         {
-            //ƒvƒŒƒCƒ„[2‚É”š’e‚ğ‚½‚¹‚é
+            //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼2ã«çˆ†å¼¾ã‚’æŒãŸã›ã‚‹
             currentBombholder = BombHolder.Player2;
             currentPlayerTurn = PlayerTurn.Player2;
-            Debug.Log("Å‰‚ÍƒvƒŒƒCƒ„[2");
+            Debug.Log($"æœ€åˆã¯{player2name}");
         }
 
         UpdateTurnUI();
     }
 
-    //”š’e‚ğ“n‚·ˆ—
+    //çˆ†å¼¾ã‚’æ¸¡ã™å‡¦ç†
     public void PassBomb()
     {
         if (currentBombholder == BombHolder.Player1)
         {
             currentBombholder = BombHolder.Player2;
-            Debug.Log("ƒvƒŒƒCƒ„[1‚©‚çƒvƒŒƒCƒ„[2‚Ö”š’e‚ğ“n‚µ‚½");
+            Debug.Log($"{player1name}ã‹ã‚‰{player2name}ã¸çˆ†å¼¾ã‚’æ¸¡ã—ãŸ");
         }
         else if (currentBombholder == BombHolder.Player2) 
         {
             currentBombholder = BombHolder.Player1;
-            Debug.Log("ƒvƒŒƒCƒ„[2‚©‚çƒvƒŒƒCƒ„[1‚Ö”š’e‚ğ“n‚µ‚½");
+            Debug.Log($"{player2name}ã‹ã‚‰{player1name}ã¸çˆ†å¼¾ã‚’æ¸¡ã—ãŸ");
         }
     }
 
-    //ŠeƒvƒŒƒCƒ„[‚Ìƒ^[ƒ“ˆ—
+    //å„ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ã‚¿ãƒ¼ãƒ³å‡¦ç†
     private void TurnManager()
     {
         //nextTurnButton.interactable = false;
-        //ƒAƒCƒeƒ€g—p‚ª1‰ñ‚¾‚¯‚È‚çƒAƒCƒeƒ€‚ğg—p‰Â”\
+        //ã‚¢ã‚¤ãƒ†ãƒ ä½¿ç”¨ãŒ1å›ã ã‘ãªã‚‰ã‚¢ã‚¤ãƒ†ãƒ ã‚’ä½¿ç”¨å¯èƒ½
         //if (ItemManager.instance.usedItems == true)
         //{
         //    canUseItems = true;
         //}
 
-        //”š’e‚ğ1‰ñˆÈã’@‚©‚È‚¯‚ê‚Î‚È‚ç‚È‚¢
+        //çˆ†å¼¾ã‚’1å›ä»¥ä¸Šå©ã‹ãªã‘ã‚Œã°ãªã‚‰ãªã„
         if (BombManager.instance.bombClicked == true)
         {
             nextTurnButton.interactable = true;
-            Debug.Log("ƒlƒNƒXƒgƒ^[ƒ“ƒ{ƒ^ƒ“‚ğ‰Ÿ‚¹‚é‚æ‚¤‚É‚È‚Á‚½");
+            Debug.Log("ãƒã‚¯ã‚¹ãƒˆã‚¿ãƒ¼ãƒ³ãƒœã‚¿ãƒ³ã‚’æŠ¼ã›ã‚‹ã‚ˆã†ã«ãªã£ãŸ");
         }
         else
         {
@@ -187,7 +195,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //ƒ^[ƒ“‚ğ‘Šè‚É“n‚·ˆ—
+    //ã‚¿ãƒ¼ãƒ³ã‚’ç›¸æ‰‹ã«æ¸¡ã™å‡¦ç†
     public void PassTurn()
     {
 
@@ -195,55 +203,84 @@ public class GameManager : MonoBehaviour
         {
             currentPlayerTurn = PlayerTurn.Player2;
             PassBomb();
-            Debug.Log("ƒvƒŒƒCƒ„[1‚©‚çƒvƒŒƒCƒ„[2‚Öƒ^[ƒ“‚ğ“n‚µ‚½");
+            
+            Debug.Log($"{player1name}ã‹ã‚‰{player2name}ã¸ã‚¿ãƒ¼ãƒ³ã‚’æ¸¡ã—ãŸ");
+
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
         {
             currentPlayerTurn = PlayerTurn.Player1;
             PassBomb();
-            Debug.Log("ƒvƒŒƒCƒ„[2‚©‚çƒvƒŒƒCƒ„[1‚Öƒ^[ƒ“‚ğ“n‚µ‚½");
+
+            Debug.Log($"{player2name}ã‹ã‚‰{player1name}ã¸ã‚¿ãƒ¼ãƒ³ã‚’æ¸¡ã—ãŸ");
+
         }
 
-        //”š’e‚ğ’@‚¢‚½‰ñ”‚ğƒŠƒZƒbƒg
+        //çˆ†å¼¾ã‚’å©ã„ãŸå›æ•°ã‚’ãƒªã‚»ãƒƒãƒˆ
         BombManager.instance.ResetTrunBombClick();
+
+        ItemManager.instance.ResetUsedItems();
+
+        //ã‚¿ã‚¤ãƒãƒ¼ã‚’ãƒªã‚»ãƒƒãƒˆã™ã‚‹
+        CountDownTimer.instance.ResetCountDownTimer();
+        //ã‚¿ã‚¤ãƒãƒ¼ã®ã‚«ã‚¦ãƒ³ãƒˆãƒ€ã‚¦ãƒ³é–‹å§‹
+        CountDownTimer.instance.StartCountDownTimer();
+
 
         UpdateTurnUI();
     }
 
-    //GameOver‚Ìˆ—
+    //GameOveræ™‚ã®å‡¦ç†
     public void GameOver()
     {
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
             Player2Win();
         }
-        if (currentPlayerTurn == PlayerTurn.Player2)
+        else if (currentPlayerTurn == PlayerTurn.Player2)
         {
             Player1Win();
         }
     }
 
-    //ƒvƒŒƒCƒ„[1‚ªŸ—˜‚µ‚½‚Æ‚«‚Ìˆ—
+    //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼1ãŒå‹åˆ©ã—ãŸã¨ãã®å‡¦ç†
     private void Player1Win()
     {
-        Debug.Log("ƒvƒŒƒCƒ„[1‚ªŸ—˜‚µ‚Ü‚µ‚½");
+        Debug.Log($"{player1name}ãŒå‹åˆ©ã—ã¾ã—ãŸ");
         player1WinCount++;
 
         RoundManager();
     }
 
-    //ƒvƒŒƒCƒ„[2‚ªŸ—˜‚µ‚½‚Æ‚«‚Ìˆ—
+    //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼2ãŒå‹åˆ©ã—ãŸã¨ãã®å‡¦ç†
     private void Player2Win()
     {
-        Debug.Log("ƒvƒŒƒCƒ„[2‚ªŸ—˜‚µ‚Ü‚µ‚½");
+        Debug.Log($"{player2name}ãŒå‹åˆ©ã—ã¾ã—ãŸ");
         player2WinCount++;
 
         RoundManager();
     }
 
-    //Œ»İ‚Ìƒ^[ƒ“‚ğ•\¦
+    //ç¾åœ¨ã®ã‚¿ãƒ¼ãƒ³ã‚’è¡¨ç¤º
     private void UpdateTurnUI()
     {
-        turnText.text = $"{currentPlayerTurn}";
+        if (currentPlayerTurn == PlayerTurn.Player1)
+        {
+            turnText.text = $"{player1name}";
+        }
+        else if (currentPlayerTurn == PlayerTurn.Player2)
+        {
+            turnText.text = $"{player2name}";
+        }
+        
+    }
+
+    //å…¥åŠ›ã—ãŸåå‰ã‚’åæ˜ ã•ã›ã‚‹å‡¦ç†
+    public void SetPlayerNames(string name1, string name2)
+    {
+        player1name = name1;
+        player2name = name2;
+
+        UpdateTurnUI();
     }
 }
