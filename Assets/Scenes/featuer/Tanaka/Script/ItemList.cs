@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[CreateAssetMenu(fileName = "i000",menuName = "アイテム作成")]
+[CreateAssetMenu(fileName = "i000", menuName = "アイテム作成")]
 
-public class ItemList:ScriptableObject
+public class ItemList : ScriptableObject
 {
     //[InspectorLabel("アイテムアイコン")]
     //public Sprite ItemIcon;
@@ -13,4 +13,7 @@ public class ItemList:ScriptableObject
 
     [Header("アイテムイメージ")]
     public Sprite ItemImage;
+
+    [Header("アイテムオブジェクト")]
+    public GameObject ItemObject;
 }

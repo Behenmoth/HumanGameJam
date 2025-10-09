@@ -195,12 +195,14 @@ public class GameManager : MonoBehaviour
         {
             currentPlayerTurn = PlayerTurn.Player2;
             PassBomb();
+
             Debug.Log("プレイヤー1からプレイヤー2へターンを渡した");
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
         {
             currentPlayerTurn = PlayerTurn.Player1;
             PassBomb();
+
             Debug.Log("プレイヤー2からプレイヤー1へターンを渡した");
         }
 

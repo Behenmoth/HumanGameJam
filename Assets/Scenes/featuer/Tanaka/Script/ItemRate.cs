@@ -36,7 +36,7 @@ public class ItemRate : MonoBehaviour
         }
 
         float randomValue = Random.Range(0f, totalRate);
-        Debug.Log($"Total Rate: {totalRate}, Random Value: {randomValue}");
+        //Debug.Log($"Total Rate: {totalRate}, Random Value: {randomValue}");
 
         float cumulativeRate = 0f;
 

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
@@ -14,6 +13,13 @@ public class ItemDisplay : MonoBehaviour
     [Header("生成先の親 (Canvas配下のTransform)")]
     public Transform itemParent;
 
+    [Header("ワールドアイテム生成管理")]
+    public WorldItemSpawner spawner;
+
+
+    private Dictionary<Transform, GameObject> spawnedObjects = new Dictionary<Transform, GameObject>();
+
+
     public enum PlayerTarget { Player1, Player2 }
 
     [Header("どのプレイヤーのアイテムを表示するか")]
@@ -22,6 +28,13 @@ public class ItemDisplay : MonoBehaviour
     public void SetDistributor(ItemDistributor d)
     {
         distributor = d;
+    }
+
+    public void SetPlayerTarget(PlayerTarget newTarget)
+    {
+        target = newTarget;
+        Debug.Log($"表示対象を {target} に設定しました");
+        UpdateItemDisplay();
     }
 
     public void UpdateItemDisplay()
@@ -61,35 +74,36 @@ public class ItemDisplay : MonoBehaviour
             Destroy(itemParent.GetChild(i).gameObject);
         }
 
-        // --- 新しいアイテムを生成 ---
-        // --- 新しいアイテムを生成 ---
+        //// --- 新しいアイテムを生成 ---
         for (int i = 0; i < items.Count; i++)
         {
             var itemData = items[i];
             if (itemData == null)
-            {
-                Debug.LogWarning($"[{name}] items[{i}] が null です。", this);
                 continue;
-            }
 
-            GameObject go = Instantiate(itemImagePrefab, itemParent);
-            Image img = go.GetComponent<Image>();
-
+            // ✅ 手札UIの生成
+            GameObject uiObj = Instantiate(itemImagePrefab, itemParent);
+            Image img = uiObj.GetComponent<Image>();
             if (img != null)
             {
                 img.sprite = itemData.ItemImage;
-                go.name = $"Item_{i}_{itemData.ItemName}";
-            }
-            else
-            {
-                Debug.LogError($"[{name}] プレハブに Image コンポーネントがありません: {itemImagePrefab.name}", this);
+                uiObj.name = $"Item_{i}_{itemData.ItemName}";
             }
 
-            // 🔽 targetがPlayer1かPlayer2かでisPlayer1を判定して渡す
             bool isPlayer1 = (target == PlayerTarget.Player1);
 
-            // 🔽 アイテム削除時にリストも更新できるように引数を渡す
-            AddClickToDestroy(go, itemData, isPlayer1);
+            // ✅ ワールドアイテム生成
+            GameObject spawnedObj = null;
+            if (spawner != null)
+            {
+                spawnedObj = spawner.Spawn(itemData); // 戻り値を受け取る
+            }
+
+            // ✅ 紐付けを登録
+            spawnedObjects[uiObj.transform] = spawnedObj;
+
+            // ✅ 削除機能を追加（Objectも削除）
+            AddClickToDestroy(uiObj, itemData, isPlayer1);
         }
 
         Debug.Log($"[{name}] {items.Count} 件のアイテムを生成しました (target={target})", this);
@@ -103,21 +117,27 @@ public class ItemDisplay : MonoBehaviour
 
         btn.onClick.AddListener(() =>
         {
-            Destroy(obj);
-
-            // ✅ データ側リストにアクセスするには distributor 経由で！
-            var targetList = isPlayer1 ? distributor.player1Items : distributor.player2Items;
-
-            if (targetList.Contains(item))
+            // 🎯 対応する3Dオブジェクトを削除
+            if (spawnedObjects.ContainsKey(obj.transform))
             {
-                targetList.Remove(item);
-                Debug.Log($"アイテム「{item.ItemName}」を削除しました。");
+                var linkedObj = spawnedObjects[obj.transform];
+                if (linkedObj != null)
+                    Destroy(linkedObj);
+
+                spawnedObjects.Remove(obj.transform);
             }
 
-            // ✅ distributorの関数を通じてUIを更新
+            // UIを削除
+            Destroy(obj);
+
+            // リストから削除
+            var targetList = isPlayer1 ? distributor.player1Items : distributor.player2Items;
+            if (targetList.Contains(item))
+                targetList.Remove(item);
+
+            // 表示更新
             distributor.UpdateAllDisplays();
         });
     }
-
 
 }

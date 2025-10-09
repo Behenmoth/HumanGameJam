@@ -6,6 +6,8 @@ public class ItemEntryKey : MonoBehaviour
     [SerializeField] private ItemRate itemRateSystemScript;
     [SerializeField] private ItemDistributor itemDistributor;
     [SerializeField] private bool isPlayer1 = true;
+    [SerializeField] private ItemDisplay display;
+
 
     void Update()
     {
@@ -14,6 +16,9 @@ public class ItemEntryKey : MonoBehaviour
         {
             Debug.Log("Enterキー（Input System）が押されました！");
             itemRateSystemScript.conditionalaGetRandomItem(itemDistributor, isPlayer1);
+
+
+            //display.SetPlayerTarget(ItemDisplay.PlayerTarget.Player2);
         }
     }
 }
