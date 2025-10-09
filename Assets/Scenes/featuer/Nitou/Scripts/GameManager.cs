@@ -47,6 +47,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+
         if (instance == null)
         {
             instance = this;
@@ -99,14 +100,14 @@ public class GameManager : MonoBehaviour
 
 
         //アイテムを各プレイヤーに配る
-        if (ItemDistributor.instance != null)
-        {
-            ItemDistributor.instance.DistributeItems();
-        }
-        else
-        {
-            Debug.LogWarning("ItemDistributor がシーンに存在しません");
-        }
+        //if (ItemDistributor.instance != null)
+        //{
+        //    ItemDistributor.instance.DistributeItems();
+        //}
+        //else
+        //{
+        //    Debug.LogWarning("ItemDistributor がシーンに存在しません");
+        //}
 
         //どちらかのプレイヤーに爆弾を渡す
         GiveBombs();
@@ -206,20 +207,14 @@ public class GameManager : MonoBehaviour
     //ターンを相手に渡す処理
     public void PassTurn()
     {
-        if (ItemDisplay.instance == null)
-        {
-            Debug.LogWarning("ItemDisplay が見つかりません");
-            return;
-        }
-
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
             currentPlayerTurn = PlayerTurn.Player2;
             PassBomb();
 
             //プレイヤーアイテム切り替える
-            Debug.Log("プレイヤーのアイテムを切り替えた");
-            ItemDisplay.instance.SetPlayerTarget(ItemDisplay.PlayerTarget.Player2);//ItemRate.instance.conditionalaGetRandomItem(ItemDistributor.instance, isPlayer1);
+            //Debug.Log("プレイヤーのアイテムを切り替えた");
+            //ItemDisplay.instance.SetPlayerTarget(ItemDisplay.PlayerTarget.Player2);//ItemRate.instance.conditionalaGetRandomItem(ItemDistributor.instance, isPlayer1);
             
             Debug.Log($"{player1name}から{player2name}へターンを渡した");
 
@@ -230,8 +225,8 @@ public class GameManager : MonoBehaviour
             PassBomb();
 
             //プレイヤーアイテム切り替える
-            Debug.Log("プレイヤーのアイテムを切り替えた");
-            ItemDisplay.instance.SetPlayerTarget(ItemDisplay.PlayerTarget.Player1);//ItemRate.instance.conditionalaGetRandomItem(ItemDistributor.instance, isPlayer1);
+            //Debug.Log("プレイヤーのアイテムを切り替えた");
+            //ItemDisplay.instance.SetPlayerTarget(ItemDisplay.PlayerTarget.Player1);//ItemRate.instance.conditionalaGetRandomItem(ItemDistributor.instance, isPlayer1);
 
             Debug.Log($"{player2name}から{player1name}へターンを渡した");
 
