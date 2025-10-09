@@ -108,7 +108,7 @@ public class BombManager : MonoBehaviour
 
     public void AddBombCount(int add)
     {
-        bombCount += add;
+        currentBombCount += add;
         Debug.Log($"爆弾カウントを +{add} しました。現在: {bombCount}");
     }
 

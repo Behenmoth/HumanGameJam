@@ -1732,6 +1732,67 @@ Transform:
   - {fileID: 251261687}
   m_Father: {fileID: 651844415}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1729909240
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1729909242}
+  - component: {fileID: 1729909241}
+  m_Layer: 0
+  m_Name: GameObject (6)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &1729909241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1729909240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d246d9308b7694f833645806a181a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  player1WinCount: 0
+  player2WinCount: 0
+  player1ItemIdList: 
+  player1ItemAmountList: 
+  player2ItemIdList: 
+  player2ItemAmountList: 
+  maxItem: 0
+  giveItem: 0
+  canUseItems: 0
+  currentBombholder: 0
+  currentPlayerTurn: 0
+  roundCount: 0
+  currentRoundCount: 0
+  winCount: 0
+  nextTurnButton: {fileID: 0}
+  roundText: {fileID: 0}
+  turnText: {fileID: 0}
+--- !u!4 &1729909242
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1729909240}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 906.2616, y: 0, z: 4478.059}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1962617253
 GameObject:
   m_ObjectHideFlags: 0
@@ -1969,3 +2030,4 @@ SceneRoots:
   - {fileID: 649723524}
   - {fileID: 1061916164}
   - {fileID: 545150966}
+  - {fileID: 1729909242}
