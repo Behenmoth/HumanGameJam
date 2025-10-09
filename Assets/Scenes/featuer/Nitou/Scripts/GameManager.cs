@@ -92,27 +92,52 @@ public class GameManager : MonoBehaviour
 
         currentRoundCount++;
 
-        roundText.text = $"Round {currentRoundCount}";
+        if (roundText != null) 
+        {
+            roundText.text = $"Round {currentRoundCount}";
+        }
+
 
         //アイテムを各プレイヤーに配る
-        ItemDistributor.instance.DistributeItems();
+        if (ItemDistributor.instance != null)
+        {
+            ItemDistributor.instance.DistributeItems();
+        }
+        else
+        {
+            Debug.LogWarning("ItemDistributor がシーンに存在しません");
+        }
 
         //どちらかのプレイヤーに爆弾を渡す
         GiveBombs();
 
-        //爆弾のカウントをランダムで決める
-        BombManager.instance.StartBombCount();
-
-        //叩いたカウントをリセットする
-        BombManager.instance.ResetTrunBombClick();
+        if (BombManager.instance != null)
+        {
+            //爆弾のカウントをランダムで決める
+            BombManager.instance.StartBombCount();
+            //叩いたカウントをリセットする
+            BombManager.instance.ResetTrunBombClick();
+        }
+        else
+        {
+            Debug.LogWarning("BombManager がシーンに存在しません");
+        }
 
         //現在のターンを表示
         UpdateTurnUI();
 
-        //タイマーをリセットする
-        CountDownTimer.instance.ResetCountDownTimer();
-        //タイマーのカウントダウン開始
-        CountDownTimer.instance.StartCountDownTimer();
+        if (CountDownTimer.instance != null)
+        {
+            //タイマーをリセットする
+            CountDownTimer.instance.ResetCountDownTimer();
+            //タイマーのカウントダウン開始
+            CountDownTimer.instance.StartCountDownTimer();
+        }
+        else
+        {
+            Debug.LogWarning("CountDownTimer がシーンに存在しません");
+        }
+
     }
 
     //どちらかのプレイヤーに爆弾を渡す処理
@@ -168,10 +193,9 @@ public class GameManager : MonoBehaviour
         //}
 
         //爆弾を1回以上叩かなければならない
-        if (BombManager.instance.bombClicked == true)
+        if (BombManager.instance != null && nextTurnButton != null)
         {
             nextTurnButton.interactable = true;
-            Debug.Log("ネクストターンボタンを押せるようになった");
         }
         else
         {
@@ -182,6 +206,11 @@ public class GameManager : MonoBehaviour
     //ターンを相手に渡す処理
     public void PassTurn()
     {
+        if (ItemDisplay.instance == null)
+        {
+            Debug.LogWarning("ItemDisplay が見つかりません");
+            return;
+        }
 
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
@@ -209,15 +238,20 @@ public class GameManager : MonoBehaviour
         }
 
         //爆弾を叩いた回数をリセット
-        BombManager.instance.ResetTrunBombClick();
+        if (BombManager.instance != null)
+        {
+            BombManager.instance.ResetTrunBombClick();
+        }
 
         //ItemManager.instance.ResetUsedItems();
 
-        //タイマーをリセットする
-        CountDownTimer.instance.ResetCountDownTimer();
-        //タイマーのカウントダウン開始
-        CountDownTimer.instance.StartCountDownTimer();
-
+        if (CountDownTimer.instance != null)
+        {
+            //タイマーをリセットする
+            CountDownTimer.instance.ResetCountDownTimer();
+            //タイマーのカウントダウン開始
+            CountDownTimer.instance.StartCountDownTimer();
+        }
 
         UpdateTurnUI();
     }
