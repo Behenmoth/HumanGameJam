@@ -98,4 +98,24 @@ public class BombManager : MonoBehaviour
         bombClicked = false;
         Debug.Log("爆弾を叩いた数をリセットしました");
     }
+
+    //田中作
+    public void SetLimitedClicks(int max)
+    {
+        Debug.Log($"叩ける回数を {max} 回に制限");
+        // 叩く回数を制限するロジックをここに
+    }
+
+    public void AddBombCount(int add)
+    {
+        currentBombCount += add;
+        Debug.Log($"爆弾カウントを +{add} しました。現在: {bombCount}");
+    }
+
+    public void HideBombCountForOpponent()
+    {
+        Debug.Log("相手から爆弾カウントを隠しました");
+        // UI上で相手に表示しないなどの処理を実装
+    }
+
 }
