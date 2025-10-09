@@ -30,8 +30,7 @@ public class NameInput : MonoBehaviour
         GameManager.instance.SetPlayerNames(player1Name, player2name);
 
         //”wŒi‚ğÁ‚µ‚ÄƒQ[ƒ€ƒXƒ^[ƒg
-        nameInputObj.SetActive(false);
-
         GameManager.instance.RoundManager();
+        nameInputObj.SetActive(false);
     }
 }
