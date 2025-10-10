@@ -34,6 +34,8 @@ public class Game : MonoBehaviour
     public TextMeshProUGUI roundWinnerText;  // 勝利者表示用テキスト (例: "1P WIN")
     public TextMeshProUGUI roundScoreText;   // スコア表示用テキスト (例: "SCORE 1 - 0")
     public Button nextButton;                 // NEXTボタン
+    
+    public Button restartButtonFinal;        // ★ 新規追加: 最終スコアパネル用のリスタートボタン
 
 
     [Header("Game Info UI")]
@@ -56,6 +58,10 @@ public class Game : MonoBehaviour
     public Button closeRuleButton;        // ルールパネルを閉じるボタン
     public Image ruleImage;               // ルール画像 (Imageコンポーネント)
     public Sprite ruleSprite;             // Unityエディタで設定するルール画像
+    public Sprite ruleSprite2;            // 2ページ目の画像
+    public Button ruleNextButton;         // 次のページへ進むボタン
+    public Button rulePrevButton;         // 前のページに戻るボタン
+
 
     [Header("Game Over UI")]
     public GameObject gameOverPanel;          // ゲームオーバーパネル全体
@@ -92,18 +98,30 @@ public class Game : MonoBehaviour
     private int player1Score = 0;
     private int player2Score = 0;
     private int currentRound = 1;
-
+    
+    
+    private int currentRulePage = 1;      //  現在表示中のルールページ (1または2)
     void Start()
     {
         // UIイベントの設定
         mainClickButton.onClick.AddListener(HandlePushClick);
         passButton.onClick.AddListener(HandlePass);
     
-        // ★ ルールボタンのリスナーを追加
+        //ルールボタンのリスナーを追加
         ruleButton.onClick.AddListener(ShowRulePanel);
         closeRuleButton.onClick.AddListener(HideRulePanel);
+            
+            //  ルールページ切り替えボタンのリスナーを追加
+        if (ruleNextButton != null)
+        {
+            ruleNextButton.onClick.AddListener(() => ChangeRulePage(1)); // 1は「進む」
+        }
+        if (rulePrevButton != null)
+        {
+            rulePrevButton.onClick.AddListener(() => ChangeRulePage(-1)); // -1は「戻る」
+        }
 
-        // ★ リスナー登録のブロックを1回にまとめる
+        //リスナー登録のブロックを1回にまとめる
         for (int i = 0; i < itemCardButtons.Length; i++)
         {
             int index = i;
@@ -114,6 +132,18 @@ public class Game : MonoBehaviour
         // アイテムパネルのボタンリスナー
         useItemButton.onClick.AddListener(UseItem);
         cancelItemButton.onClick.AddListener(HideItemPanel);
+
+        //リスタートボタン（最終スコアパネル用）のリスナーを追加
+        if (restartButtonFinal != null)
+        {
+            restartButtonFinal.onClick.AddListener(OnNextButtonClicked);
+        }
+
+        // NEXTボタン（途中ラウンド用）のリスナーを再追加
+        if (nextButton != null)
+        {
+            nextButton.onClick.AddListener(OnNextButtonClicked);
+        }
 
         // 初期状態でアイテムパネルを非表示にする
         if (itemPanel != null)
@@ -135,7 +165,7 @@ public class Game : MonoBehaviour
 
 
         // ★ ゲームオーバーパネルのボタンリスナーと初期非表示を追加
-        nextButton.onClick.AddListener(OnNextButtonClicked);
+       // nextButton.onClick.AddListener(OnNextButtonClicked);
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
@@ -252,11 +282,7 @@ public class Game : MonoBehaviour
             roundNumberRect.anchoredPosition = new Vector2(targetXInfo, roundNumberRect.anchoredPosition.y);
         }
 
-        if (scoreRect != null)
-        {
-            scoreRect.anchoredPosition = new Vector2(targetXInfo, scoreRect.anchoredPosition.y);
-        }
-
+        
         string playerTurnName = isPlayer1Turn ? "1P" : "2P";
         turnIndicatorText.text = playerTurnName + " turn";
     }
@@ -273,7 +299,9 @@ public class Game : MonoBehaviour
         }
 
         // 1. ルール画像をImageコンポーネントに設定
-        ruleImage.sprite = ruleSprite;
+        currentRulePage = 1;
+        UpdateRuleImage(); // ★ 1ページ目の画像を表示し、ボタンの状態を更新
+;
 
         // 2. パネルを表示
         rulePanel.SetActive(true);
@@ -283,9 +311,54 @@ public class Game : MonoBehaviour
         mainClickButton.interactable = false;
         passButton.interactable = false;
 
+        // 常時表示UIも非表示にする
+        if (counterText != null) counterText.gameObject.SetActive(false); // カウンター表示
+        if (turnIndicatorText != null) turnIndicatorText.gameObject.SetActive(false); // ターンインジケーター
+        if (roundNumberText != null) roundNumberText.gameObject.SetActive(false); //  ラウンド数
+        if (scoreText != null) scoreText.gameObject.SetActive(false); //  スコア
+
+
         // ルールボタン自体も連打防止のため無効化
         ruleButton.interactable = false;
     }
+
+    //  ページを切り替えるメソッド
+    public void ChangeRulePage(int direction)
+    {
+        currentRulePage += direction;
+
+        // ページを1と2の間にクランプ（制限）する
+        if (currentRulePage < 1)
+        {
+            currentRulePage = 1;
+        }
+        else if (currentRulePage > 2)
+        {
+            currentRulePage = 2;
+        }
+
+        UpdateRuleImage();
+    }
+    
+    // ★ 画像とボタンの表示状態を更新するヘルパーメソッド
+    private void UpdateRuleImage()
+    {
+        if (currentRulePage == 1)
+        {
+            // 1ページ目を表示
+            ruleImage.sprite = ruleSprite;
+            if (rulePrevButton != null) rulePrevButton.interactable = false;
+            if (ruleNextButton != null) ruleNextButton.interactable = (ruleSprite2 != null); // 2ページ目があればNextを有効化
+        }
+        else if (currentRulePage == 2)
+        {
+            // 2ページ目を表示
+            ruleImage.sprite = ruleSprite2;
+            if (rulePrevButton != null) rulePrevButton.interactable = true;
+            if (ruleNextButton != null) ruleNextButton.interactable = false;
+        }
+    }
+
     
     // 閉じるボタンがクリックされたときに、ルールパネルを非表示にします。
 
@@ -295,6 +368,13 @@ public class Game : MonoBehaviour
 
         // 1. パネルを非表示
         rulePanel.SetActive(false);
+
+        //  非表示にした常時表示UIを再表示する
+        if (counterText != null) counterText.gameObject.SetActive(true); //  カウンター表示
+        if (turnIndicatorText != null) turnIndicatorText.gameObject.SetActive(true);
+        if (roundNumberText != null) roundNumberText.gameObject.SetActive(true); //  ラウンド数
+        if (scoreText != null) scoreText.gameObject.SetActive(true); //  スコア
+
 
         // 2. メイン操作のロックを解除（ターン開始時と同じ状態に戻す）
         isClickingAllowed = true;
@@ -496,9 +576,7 @@ public class Game : MonoBehaviour
             string loserName = playerWhoLost ? "1P" : "2P"; // 爆発させたプレイヤーが負け
             string winnerName = playerWhoLost ? "2P" : "1P"; // 相手プレイヤーが勝利
 
-            // テキストを設定
-            youDiedText.text = "YOU DIED";
-            
+           
             // 2. ★ ランダムな負け犬メッセージを選択
             string randomMessage = "";
             if (loserMessages.Length > 0)
@@ -509,84 +587,150 @@ public class Game : MonoBehaviour
             {
                 randomMessage = "敗者よ、静かに眠れ。"; // 候補がない場合のフォールバック
             }
+
+             // テキストを設定
+            youDiedText.text = "YOU DIED";
             
             // 3. 負けたプレイヤー名とランダムメッセージを表示
             loserMessageText.text = $"{randomMessage} ({loserName})"; 
             
             // 勝利したプレイヤー名を表示
             winnerText.text = $"{winnerName} WIN! (Round {currentRound})"; 
+            
+            // ★ NEXTボタンのGameObjectをアクティブにする
+            if (nextButton != null)
+            {
+                nextButton.gameObject.SetActive(true); // ★ この行でボタンを表示
+                nextButton.interactable = true;       // クリック可能にする
+            }
 
             // 次のラウンドへ移行
-            StartCoroutine(WaitAndStartNextRound(3.0f)); 
+           // StartCoroutine(WaitAndStartNextRound(3.0f)); 
         }
         else
         {
             // パネルが設定されていない場合のフォールバック
             currentRound++;
-            StartCoroutine(WaitAndStartNextRound(3.0f));
+            StartRound();
         }
 
     }
 
-    IEnumerator WaitAndStartNextRound(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        
-
-        // ★ YOU DIEDパネルを非表示にする
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(false);
-        }
-        
-        currentRound++; // 次のラウンドへ進める
-        
-        // ★ 新しいラウンド数を表示
-        if (roundNumberText != null)
-        {
-            roundNumberText.text = $"ROUND {currentRound}";
-        }
-        
-        StartRound();
-    }
+  
     public void OnNextButtonClicked()
     {
-        if (roundResultPanel != null)
+        // 1. Final Game Over判定: スコアが2本先取に達している場合、ゲーム全体をリスタートする
+        if (player1Score == 2 || player2Score == 2)
         {
-            roundResultPanel.SetActive(false);
+            // ゲームオーバー後のパネルをすべて非表示にする
+            if (roundResultPanel != null)
+            {
+                roundResultPanel.SetActive(false);
+            }
+            if (gameOverPanel != null)
+            {
+                gameOverPanel.SetActive(false);
+            }
+            StartGame(); // ゲーム全体をリスタート
         }
-        if (gameOverPanel != null)
+        // 2. ラウンド終了判定: スコアが2本先取に達していない場合、次のラウンドへ進む
+        else
         {
-            gameOverPanel.SetActive(false); // パネルを非表示にする
+            // ラウンド終了パネル (gameOverPanel) を非表示にする
+            if (gameOverPanel != null)
+            {
+                gameOverPanel.SetActive(false);
+            }
+            
+            // 次のラウンドへ進める処理
+            currentRound++; 
+            
+            // 新しいラウンド数を表示
+            if (roundNumberText != null)
+            {
+                roundNumberText.text = $"ROUND {currentRound}";
+            }
+            
+            StartRound(); // 新しいラウンドを開始
         }
-
-        // ★ ゲームをリスタートする
-        StartGame();
 
     }
 
     void EndGame()
-    {  
-        // ★ シンプルなスコアパネル（roundResultPanel）で最終結果を表示
-        if (roundResultPanel == null)
-        {
-            string winner = (player1Score == 2) ? "1P" : "2P";
-            turnIndicatorText.text = $"Winner {winner}";
-            return;
-        }
-        
-        // --- ゲーム終了パネル（シンプルなスコア画面）の表示ロジック ---
+    {
+        // 1. ラウンドとスコアの表示を非表示にする
+        if (roundNumberText != null) roundNumberText.gameObject.SetActive(false);
+        if (scoreText != null) scoreText.gameObject.SetActive(false);
 
-        roundResultPanel.SetActive(true); // パネルを表示
-
+        // 2. 最終勝者と敗者を特定
         string finalWinnerName = (player1Score == 2) ? "1P" : "2P";
+        string finalLoserName = (player1Score < player2Score) ? "1P" : "2P";
 
-        // テキストを設定
-        roundWinnerText.text = $"{finalWinnerName} WIN!";
-        roundScoreText.text = $"SCORE {player1Score} - {player2Score}";
-        
-        // NOTE: ゲーム終了後はNEXTボタン（roundResultPanel内にはない）か、手動でのリスタートが必要です。
-        // （NEXTボタンはgameOverPanelにのみ実装されているため、リスタート処理は省略します）
 
+        // --- 最終ラウンド敗北画面（YOU DIED画面）を表示 ---
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true); // パネルを表示
+
+            // ランダムな負け犬メッセージを選択
+            string randomMessage = "";
+            if (loserMessages.Length > 0)
+            {
+                int randomIndex = Random.Range(0, loserMessages.Length);
+                randomMessage = loserMessages[randomIndex];
+            }
+            else
+            {
+                randomMessage = "敗者よ、静かに眠れ。"; // 候補がない場合のフォールバック
+            }
+
+            // テキストを設定
+            youDiedText.text = "YOU DIED";
+            loserMessageText.text = $"{randomMessage} ({finalLoserName})"; // 敗者に向けたメッセージ
+            winnerText.text = $"{finalWinnerName} WIN! (FINAL)"; // 勝利者表示
+
+            // ★ NEXTボタンのGameObjectを非アクティブにする（非表示にする）
+            if (nextButton != null)
+            {
+                nextButton.gameObject.SetActive(false); // ★ この行を変更
+            }
+
+            // ★ 2秒後にスコアパネルに切り替えるコルーチンを開始
+            StartCoroutine(TransitionToFinalScore(2.0f));
+        }
+
+        // スコアパネルは非表示のまま
+        if (roundResultPanel != null)
+        {
+            roundResultPanel.SetActive(false);
+        }
     }
+
+    IEnumerator TransitionToFinalScore(float delay)
+    {
+        // 2秒待機
+        yield return new WaitForSeconds(delay);
+
+        // 1. YOU DIEDパネルを非表示にする
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false); //  NEXTボタンを再アクティブ化する（スコアパネル表示後のリスタート用）
+        
+        }
+
+            // 2. スコアパネル（roundResultPanel）を表示する    
+        if (roundResultPanel != null)
+        {
+            roundResultPanel.SetActive(true); // パネルを表示
+
+            string finalWinnerName = (player1Score == 2) ? "1P" : "2P";
+
+            // テキストを設定
+            roundWinnerText.text = $"{finalWinnerName} WIN!";
+            roundScoreText.text = $"SCORE {player1Score} - {player2Score}";
+
+        }
+    }
+
+   
 }
