@@ -24,6 +24,18 @@ public class GameManager : MonoBehaviour
     public GameObject a1to2;
     public GameObject b2to1;
 
+    [Header("リザルト")]
+    public GameObject resultUI;
+
+    [Header("勝者")]
+    public TMP_Text winerText;
+
+    [Header("ゲーム勝利")]
+    public GameObject gameWin;
+    public TMP_Text gameWinerText;
+    public TMP_Text scoreText;
+   
+
     //爆弾の所持状況
     public enum BombHolder {None,Player1,Player2}
 
@@ -77,6 +89,8 @@ public class GameManager : MonoBehaviour
 
         a1to2.SetActive(false);
         b2to1.SetActive(false);
+        resultUI.SetActive(false);
+        gameWin.SetActive(false);
 
         currentRoundCount = 0;
     }
@@ -93,12 +107,14 @@ public class GameManager : MonoBehaviour
         if (player1WinCount >= winCount)
         {
             Debug.Log($"{player1name}");
+            Player1GameWin();
             return;
         }
 
         if (player2WinCount >= winCount)
         {
             Debug.Log($"{player2name}");
+            Player2GameWin();
             return;
         }
 
@@ -237,7 +253,7 @@ public class GameManager : MonoBehaviour
             PassBomb();
 
             //プレイヤーアイテム切り替える
-            b2to1.SetActive(false);
+            b2to1.SetActive(true);
             Debug.Log($"{player2name}から{player1name}へターンを渡した");
 
         }
@@ -338,16 +354,19 @@ public class GameManager : MonoBehaviour
     {
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
-            Player2Win();
+            winerText.text = player2name;
+            resultUI.SetActive(true);
+            
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
         {
-            Player1Win();
+            winerText.text = player1name;
+            resultUI.SetActive(true);
         }
     }
 
     //プレイヤー1が勝利したときの処理
-    private void Player1Win()
+    public void Player1Win()
     {
         Debug.Log($"{player1name}が勝利しました");
         player1WinCount++;
@@ -356,7 +375,7 @@ public class GameManager : MonoBehaviour
     }
 
     //プレイヤー2が勝利したときの処理
-    private void Player2Win()
+    public void Player2Win()
     {
         Debug.Log($"{player2name}が勝利しました");
         player2WinCount++;
@@ -387,5 +406,17 @@ public class GameManager : MonoBehaviour
         UpdateTurnUI();
     }
 
-    
+    public void Player1GameWin()
+    {
+        gameWin.SetActive(true);
+        gameWinerText.text = player1name;
+        scoreText.text = ($"{player1WinCount}-{player2WinCount}");
+    }
+
+    public void Player2GameWin()
+    {
+        gameWin.SetActive(true);
+        gameWinerText.text = player2name;
+        scoreText.text = ($"{player2WinCount}-{player1WinCount}");
+    }
 }
