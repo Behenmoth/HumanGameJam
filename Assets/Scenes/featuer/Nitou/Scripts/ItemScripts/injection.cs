@@ -10,6 +10,10 @@ public class injection : MonoBehaviour
     public Button button2;
     public Button button3;
 
+    [Header("Œð‘ã•\Ž¦")]
+    public GameObject p1to2;
+    public GameObject p2to1;
+
     [Header("UI–{‘Ì")]
     public GameObject ui;
 
@@ -54,6 +58,12 @@ public class injection : MonoBehaviour
         BombManager.instance.SetLimitedClicks(count);
 
         GameManager.instance.PassTurn();
+    }
+
+    public void OnCloseChange()
+    {
+        p1to2.SetActive(false);
+        p2to1.SetActive(false);
     }
 
 }
