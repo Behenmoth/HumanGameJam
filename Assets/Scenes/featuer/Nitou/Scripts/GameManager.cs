@@ -14,7 +14,7 @@ public class GameManager : MonoBehaviour
     public int player2WinCount;
 
     [Header("アイテム使用の可否")]
-    public bool canUseItems = false;
+    public bool canUseItems = true;
 
     [Header("プレイヤーの名前")]
     string player1name = "Player1";
@@ -43,6 +43,7 @@ public class GameManager : MonoBehaviour
 
     [Header("ボタン")]
     public Button nextTurnButton;
+    public Button useItemButton;
 
     [Header("テキストUI")]
     public TMP_Text roundText;
@@ -68,6 +69,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         UnityEngine.Random.InitState(DateTime.Now.Millisecond);
+        canUseItems = true;
 
         currentRoundCount = 0;
     }
@@ -182,13 +184,8 @@ public class GameManager : MonoBehaviour
     //各プレイヤーのターン処理
     private void TurnManager()
     {
-
-        //nextTurnButton.interactable = false;
         //アイテム使用が1回だけならアイテムを使用可能
-        //if (ItemManager.instance.usedItems == true)
-        //{
-        //    canUseItems = true;
-        //}
+        useItemButton.interactable = canUseItems;
 
 
         //爆弾を1回以上叩かなければならない
@@ -216,6 +213,7 @@ public class GameManager : MonoBehaviour
     //ターンを相手に渡す処理
     public void PassTurn()
     {
+        Debug.Log($"{currentPlayerTurn}");
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
             currentPlayerTurn = PlayerTurn.Player2;
@@ -237,6 +235,8 @@ public class GameManager : MonoBehaviour
 
         }
 
+
+
         //爆弾を叩いた回数をリセット
         if (BombManager.instance != null)
         {
@@ -252,11 +252,78 @@ public class GameManager : MonoBehaviour
             CountDownTimer.instance.StartCountDownTimer();
         }
 
+        //ターン開始時にアイテムを使用可にする
+        canUseItems = true;
+        useItemButton.interactable = true;
+
+        // ターンUI更新
         UpdateTurnUI();
 
         //表示するアイテムを切り替え
         player1Inventory.SetActiveObjects(currentPlayerTurn);
         player2Inventory.SetActiveObjects(currentPlayerTurn);
+        Debug.Log($"{currentPlayerTurn}");
+    }
+
+    //相手のターンを飛ばす関数
+    public void SkipOpponentTurn()
+    {
+        Debug.Log($"{currentPlayerTurn}");
+        Debug.Log("相手のターンをスキップします");
+
+        if (currentPlayerTurn == PlayerTurn.Player1)
+        {
+
+            currentBombholder = BombHolder.Player1;
+
+            //爆弾のクリック数をリセットする
+            if (BombManager.instance != null)
+            {
+                BombManager.instance.ResetTrunBombClick();
+            }
+
+            //カウントダウンタイマーをリセットする
+            if (CountDownTimer.instance != null)
+            {
+                CountDownTimer.instance.ResetCountDownTimer();
+                CountDownTimer.instance.StartCountDownTimer();
+            }
+
+            // プレイヤーターン更新
+            currentPlayerTurn = PlayerTurn.Player1;
+        }
+        else if (currentPlayerTurn == PlayerTurn.Player2)
+        {
+            currentBombholder = BombHolder.Player2;
+
+            //爆弾のクリック数をリセットする
+            if (BombManager.instance != null)
+            {
+                BombManager.instance.ResetTrunBombClick();
+            }
+
+            //カウントダウンタイマーをリセットする
+            if (CountDownTimer.instance != null)
+            {
+                CountDownTimer.instance.ResetCountDownTimer();
+                CountDownTimer.instance.StartCountDownTimer();
+            }
+
+            currentPlayerTurn = PlayerTurn.Player2;
+        }
+
+        //ターン開始時にアイテムを使用可にする
+        canUseItems = true;
+        useItemButton.interactable = true;
+
+        // ターンUI更新
+        UpdateTurnUI();
+
+        // 表示アイテム更新
+        player1Inventory.SetActiveObjects(currentPlayerTurn);
+        player2Inventory.SetActiveObjects(currentPlayerTurn);
+
+        Debug.Log($"{currentPlayerTurn}");
     }
 
     //GameOver時の処理
@@ -312,4 +379,6 @@ public class GameManager : MonoBehaviour
 
         UpdateTurnUI();
     }
+
+    
 }

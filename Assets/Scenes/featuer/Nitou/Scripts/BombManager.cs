@@ -20,6 +20,7 @@ public class BombManager : MonoBehaviour
     [Header("爆弾を叩く上限")]
     public int maxBombClickCount;
     public int currentBombClickCount;
+    public int forcedClickLimit = -1;
 
     [Header("テキストUI")]
     public TMP_Text bombCountText;
@@ -107,17 +108,40 @@ public class BombManager : MonoBehaviour
     //爆弾のカウントを減らす
     public void BombClick()
     {
-        //爆弾を叩ける回数に上限を設ける
-        if (currentBombClickCount >= maxBombClickCount)
+        //注射を使用された時
+        if (forcedClickLimit > 0)
         {
-            Debug.Log("これ以上爆弾は叩けない");
-            return;
-        }
+            currentBombClickCount++;
+            currentBombCount--;
 
-        bombClicked = true;
-        currentBombClickCount++;
-        currentBombCount--;
-        Debug.Log("現在のカウント数は" + currentBombCount);
+            //指定回数叩いたとき
+            if (currentBombClickCount >= forcedClickLimit)
+            {
+                Debug.Log("注射効果終了");
+                
+                bombClicked = true;
+                forcedClickLimit = -1;
+                GameManager.instance.PassTurn();
+            }
+        }
+        //通常状態
+        else
+        {
+            //爆弾を叩ける回数に上限を設ける
+            maxBombClickCount = 3;
+
+            if (currentBombClickCount >= maxBombClickCount)
+            {
+                Debug.Log("これ以上爆弾は叩けない");
+                return;
+            }
+
+            bombClicked = true;
+            currentBombClickCount++;
+            currentBombCount--;
+            Debug.Log("現在のカウント数は" + currentBombCount);
+        }
+        
 
         //カウントが半分になればアイテムを配布
         if (!hasHalfBombCount && halfBombCount >= currentBombCount)
@@ -174,11 +198,10 @@ public class BombManager : MonoBehaviour
         ItemDistribution.instance.GiveRandomItems(targetInventry, 1);
     }
 
-    //田中作
     public void SetLimitedClicks(int max)
     {
-        Debug.Log($"叩ける回数を {max} 回に制限");
-        // 叩く回数を制限するロジックをここに
+        forcedClickLimit = max;
+        maxBombClickCount = forcedClickLimit;
     }
 
     public void AddBombCount(int add)

@@ -81,6 +81,32 @@ public class PlayerInventry : MonoBehaviour
         }
     }
 
+    //使用したアイテムを削除する処理
+    public void RemoveItem(ItemData usedItem)
+    {
+        //所持アイテムから使ったアイテムを検索する
+        int index = items.IndexOf(usedItem);
+
+        if (index >= 0)
+        {
+            if (index < spawnItems.Count && spawnItems[index] != null)
+            {
+                //オブジェクトとリストからを削除する
+                Destroy(spawnItems[index]);
+                spawnItems.RemoveAt(index);
+            }
+
+            //所持リストから削除
+            items.RemoveAt(index);
+
+            Debug.Log($"{usedItem.itemName}を削除しました");
+        }
+        else
+        {
+            Debug.LogWarning($"使用アイテム {usedItem.itemName} はインベントリに存在しません");
+        }
+    }
+
     //ターン経過時用にアイテムの表示・非表示を切り替える処理
     public void SetActiveObjects(GameManager.PlayerTurn currentPlayerTurn)
     {
