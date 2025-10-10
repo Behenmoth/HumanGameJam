@@ -1244,10 +1244,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c133d185ff9fdda469cae9f8a46514c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::injection
-  button1: {fileID: 0}
-  button2: {fileID: 0}
-  button3: {fileID: 0}
-  ui: {fileID: 0}
+  button1: {fileID: 689898037}
+  button2: {fileID: 2129247962}
+  button3: {fileID: 1400838072}
+  ui: {fileID: 22308852}
 --- !u!1 &537020621
 GameObject:
   m_ObjectHideFlags: 0
@@ -1263,7 +1263,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &537020622
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1796,7 +1796,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 689898038}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 492809675}
+        m_TargetAssemblyTypeName: injection, Assembly-CSharp
+        m_MethodName: OnButton1
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &689898038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3505,7 +3517,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1400838073}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 492809675}
+        m_TargetAssemblyTypeName: injection, Assembly-CSharp
+        m_MethodName: OnButton3
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1400838073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3840,7 +3864,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1663013421
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5146,7 +5170,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2129247963}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 492809675}
+        m_TargetAssemblyTypeName: injection, Assembly-CSharp
+        m_MethodName: OnButton2
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2129247963
 MonoBehaviour:
   m_ObjectHideFlags: 0

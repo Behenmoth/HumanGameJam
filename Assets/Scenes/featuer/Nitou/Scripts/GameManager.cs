@@ -20,6 +20,10 @@ public class GameManager : MonoBehaviour
     string player1name = "Player1";
     string player2name = "Player2";
 
+    [Header("プレイヤー交代")]
+    public GameObject a1to2;
+    public GameObject b2to1;
+
     //爆弾の所持状況
     public enum BombHolder {None,Player1,Player2}
 
@@ -70,6 +74,9 @@ public class GameManager : MonoBehaviour
     {
         UnityEngine.Random.InitState(DateTime.Now.Millisecond);
         canUseItems = true;
+
+        a1to2.SetActive(false);
+        b2to1.SetActive(false);
 
         currentRoundCount = 0;
     }
@@ -220,7 +227,7 @@ public class GameManager : MonoBehaviour
             PassBomb();
 
             //プレイヤーアイテム切り替える
-
+            a1to2.SetActive(true);
             Debug.Log($"{player1name}から{player2name}へターンを渡した");
 
         }
@@ -230,7 +237,7 @@ public class GameManager : MonoBehaviour
             PassBomb();
 
             //プレイヤーアイテム切り替える
-
+            b2to1.SetActive(false);
             Debug.Log($"{player2name}から{player1name}へターンを渡した");
 
         }
