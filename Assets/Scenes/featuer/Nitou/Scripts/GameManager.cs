@@ -14,11 +14,15 @@ public class GameManager : MonoBehaviour
     public int player2WinCount;
 
     [Header("アイテム使用の可否")]
-    public bool canUseItems = false;
+    public bool canUseItems = true;
 
     [Header("プレイヤーの名前")]
     string player1name = "Player1";
     string player2name = "Player2";
+
+    [Header("プレイヤー交代")]
+    public GameObject a1to2;
+    public GameObject b2to1;
 
     //爆弾の所持状況
     public enum BombHolder {None,Player1,Player2}
@@ -31,22 +35,30 @@ public class GameManager : MonoBehaviour
 
     [Header("ターン")]
     public PlayerTurn currentPlayerTurn = PlayerTurn.None;
-    public bool isPlayer1 = false;
 
     [Header("ラウンド数")]
     public int roundCount;
     public int currentRoundCount;
     public int winCount;
 
+    [Header("各プレイヤーのインベントリー")]
+    public PlayerInventry player1Inventory;
+    public PlayerInventry player2Inventory;
+
     [Header("ボタン")]
     public Button nextTurnButton;
+    public Button useItemButton;
 
     [Header("テキストUI")]
     public TMP_Text roundText;
     public TMP_Text turnText;
 
+    [Header("UI制御")]
+    public bool canNexttrunButton;
+
     private void Awake()
     {
+
         if (instance == null)
         {
             instance = this;
@@ -61,6 +73,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         UnityEngine.Random.InitState(DateTime.Now.Millisecond);
+        canUseItems = true;
+
+        a1to2.SetActive(false);
+        b2to1.SetActive(false);
 
         currentRoundCount = 0;
     }
@@ -74,45 +90,62 @@ public class GameManager : MonoBehaviour
     //ラウンドを管理する処理
     public void RoundManager()
     {
-        if (currentRoundCount >= roundCount)
-        {
-            Debug.Log("全ラウンド終了");
-            return;
-        }
-
         if (player1WinCount >= winCount)
         {
             Debug.Log($"{player1name}");
+            return;
         }
 
         if (player2WinCount >= winCount)
         {
-            Debug.Log($"{player1name}");
+            Debug.Log($"{player2name}");
+            return;
         }
 
         currentRoundCount++;
 
-        roundText.text = $"Round {currentRoundCount}";
-
-        //アイテムを各プレイヤーに配る
-        ItemDistributor.instance.DistributeItems();
+        if (roundText != null) 
+        {
+            roundText.text = $"Round {currentRoundCount}";
+        }
 
         //どちらかのプレイヤーに爆弾を渡す
         GiveBombs();
 
-        //爆弾のカウントをランダムで決める
-        BombManager.instance.StartBombCount();
+        //アイテムを各プレイヤーに配る
+        ItemDistribution.instance.Distribution();
 
-        //叩いたカウントをリセットする
-        BombManager.instance.ResetTrunBombClick();
+        //表示するアイテムを切り替え
+        player1Inventory.SetActiveObjects(currentPlayerTurn);
+        player2Inventory.SetActiveObjects(currentPlayerTurn);
+
+        if (BombManager.instance != null)
+        {
+            //爆弾のカウントをランダムで決める
+            BombManager.instance.StartBombCount();
+            //叩いたカウントをリセットする
+            BombManager.instance.ResetTrunBombClick();
+        }
+        else
+        {
+            Debug.LogWarning("BombManager がシーンに存在しません");
+        }
 
         //現在のターンを表示
         UpdateTurnUI();
 
-        //タイマーをリセットする
-        CountDownTimer.instance.ResetCountDownTimer();
-        //タイマーのカウントダウン開始
-        CountDownTimer.instance.StartCountDownTimer();
+        if (CountDownTimer.instance != null)
+        {
+            //タイマーをリセットする
+            CountDownTimer.instance.ResetCountDownTimer();
+            //タイマーのカウントダウン開始
+            CountDownTimer.instance.StartCountDownTimer();
+        }
+        else
+        {
+            Debug.LogWarning("CountDownTimer がシーンに存在しません");
+        }
+
     }
 
     //どちらかのプレイヤーに爆弾を渡す処理
@@ -124,7 +157,6 @@ public class GameManager : MonoBehaviour
         {
             //プレイヤー1に爆弾を持たせる
             currentBombholder = BombHolder.Player1;
-            isPlayer1 = true;
 
             currentPlayerTurn = PlayerTurn.Player1;
             Debug.Log($"最初は{player1name}");
@@ -133,7 +165,6 @@ public class GameManager : MonoBehaviour
         {
             //プレイヤー2に爆弾を持たせる
             currentBombholder = BombHolder.Player2;
-            isPlayer1 = false;
 
             currentPlayerTurn = PlayerTurn.Player2;
             Debug.Log($"最初は{player2name}");
@@ -160,38 +191,43 @@ public class GameManager : MonoBehaviour
     //各プレイヤーのターン処理
     private void TurnManager()
     {
-        //nextTurnButton.interactable = false;
         //アイテム使用が1回だけならアイテムを使用可能
-        //if (ItemManager.instance.usedItems == true)
-        //{
-        //    canUseItems = true;
-        //}
+        useItemButton.interactable = canUseItems;
+
 
         //爆弾を1回以上叩かなければならない
-        if (BombManager.instance.bombClicked == true)
+        if (BombManager.instance != null && nextTurnButton != null)
         {
-            nextTurnButton.interactable = true;
-            Debug.Log("ネクストターンボタンを押せるようになった");
+            if (BombManager.instance.bombClicked == true)
+            {
+                canNexttrunButton = true;
+            }
+            else
+            {
+                canNexttrunButton = false;
+            }
         }
-        else
+
+        //アイテムUIが開いている間はネクストターンボタンは押せない
+        if (ItemUIManager.instance.isUiOpen)
         {
-            nextTurnButton.interactable = false;
+            canNexttrunButton = false;
         }
+
+        nextTurnButton.interactable = canNexttrunButton;
     }
 
     //ターンを相手に渡す処理
     public void PassTurn()
     {
-
+        Debug.Log($"{currentPlayerTurn}");
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
             currentPlayerTurn = PlayerTurn.Player2;
             PassBomb();
 
             //プレイヤーアイテム切り替える
-            Debug.Log("プレイヤーのアイテムを切り替えた");
-            ItemDisplay.instance.SetPlayerTarget(ItemDisplay.PlayerTarget.Player2);//ItemRate.instance.conditionalaGetRandomItem(ItemDistributor.instance, isPlayer1);
-            
+            a1to2.SetActive(true);
             Debug.Log($"{player1name}から{player2name}へターンを渡した");
 
         }
@@ -201,25 +237,100 @@ public class GameManager : MonoBehaviour
             PassBomb();
 
             //プレイヤーアイテム切り替える
-            Debug.Log("プレイヤーのアイテムを切り替えた");
-            ItemDisplay.instance.SetPlayerTarget(ItemDisplay.PlayerTarget.Player1);//ItemRate.instance.conditionalaGetRandomItem(ItemDistributor.instance, isPlayer1);
-
+            b2to1.SetActive(false);
             Debug.Log($"{player2name}から{player1name}へターンを渡した");
 
         }
 
+
+
         //爆弾を叩いた回数をリセット
-        BombManager.instance.ResetTrunBombClick();
-
-        //ItemManager.instance.ResetUsedItems();
-
-        //タイマーをリセットする
-        CountDownTimer.instance.ResetCountDownTimer();
-        //タイマーのカウントダウン開始
-        CountDownTimer.instance.StartCountDownTimer();
+        if (BombManager.instance != null)
+        {
+            BombManager.instance.ResetTrunBombClick();
+        }
 
 
+        if (CountDownTimer.instance != null)
+        {
+            //タイマーをリセットする
+            CountDownTimer.instance.ResetCountDownTimer();
+            //タイマーのカウントダウン開始
+            CountDownTimer.instance.StartCountDownTimer();
+        }
+
+        //ターン開始時にアイテムを使用可にする
+        canUseItems = true;
+        useItemButton.interactable = true;
+
+        // ターンUI更新
         UpdateTurnUI();
+
+        //表示するアイテムを切り替え
+        player1Inventory.SetActiveObjects(currentPlayerTurn);
+        player2Inventory.SetActiveObjects(currentPlayerTurn);
+        Debug.Log($"{currentPlayerTurn}");
+    }
+
+    //相手のターンを飛ばす関数
+    public void SkipOpponentTurn()
+    {
+        Debug.Log($"{currentPlayerTurn}");
+        Debug.Log("相手のターンをスキップします");
+
+        if (currentPlayerTurn == PlayerTurn.Player1)
+        {
+
+            currentBombholder = BombHolder.Player1;
+
+            //爆弾のクリック数をリセットする
+            if (BombManager.instance != null)
+            {
+                BombManager.instance.ResetTrunBombClick();
+            }
+
+            //カウントダウンタイマーをリセットする
+            if (CountDownTimer.instance != null)
+            {
+                CountDownTimer.instance.ResetCountDownTimer();
+                CountDownTimer.instance.StartCountDownTimer();
+            }
+
+            // プレイヤーターン更新
+            currentPlayerTurn = PlayerTurn.Player1;
+        }
+        else if (currentPlayerTurn == PlayerTurn.Player2)
+        {
+            currentBombholder = BombHolder.Player2;
+
+            //爆弾のクリック数をリセットする
+            if (BombManager.instance != null)
+            {
+                BombManager.instance.ResetTrunBombClick();
+            }
+
+            //カウントダウンタイマーをリセットする
+            if (CountDownTimer.instance != null)
+            {
+                CountDownTimer.instance.ResetCountDownTimer();
+                CountDownTimer.instance.StartCountDownTimer();
+            }
+
+            currentPlayerTurn = PlayerTurn.Player2;
+        }
+
+        //ターン開始時にアイテムを使用可にする
+        canUseItems = true;
+        useItemButton.interactable = true;
+
+        // ターンUI更新
+        UpdateTurnUI();
+
+        // 表示アイテム更新
+        player1Inventory.SetActiveObjects(currentPlayerTurn);
+        player2Inventory.SetActiveObjects(currentPlayerTurn);
+
+        Debug.Log($"{currentPlayerTurn}");
     }
 
     //GameOver時の処理
@@ -275,4 +386,6 @@ public class GameManager : MonoBehaviour
 
         UpdateTurnUI();
     }
+
+    
 }

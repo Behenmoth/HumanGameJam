@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19e0e18ea8f61374a9ec964ab4a7aba5, type: 3}
+  m_Name: i001
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: "\u624B\u9320"
+  itemID: 1
+  description: "\u81EA\u5206\u306E\u30BF\u30FC\u30F3\u30921\u30BF\u30FC\u30F3\u98DB\u3070\u3059"
+  itemCards: {fileID: 21300000, guid: 523ba48c922599741989e310a1e0f5dd, type: 3}
+  dropRate: 0.2
+  spawnObj: {fileID: 3505125893436494184, guid: f64e13b5d194dbb4a81742148acd5e98, type: 3}
+  spawnRotation: {x: -90, y: 0, z: 80}
