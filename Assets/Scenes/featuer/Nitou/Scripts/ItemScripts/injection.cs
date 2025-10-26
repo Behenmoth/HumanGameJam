@@ -10,6 +10,10 @@ public class injection : MonoBehaviour
     public Button button2;
     public Button button3;
 
+    [Header("交代表示")]
+    public GameObject p1to2;
+    public GameObject p2to1;
+
     [Header("UI本体")]
     public GameObject ui;
 
@@ -57,6 +61,12 @@ public class injection : MonoBehaviour
         // 相手ターンの爆弾叩く回数を設定
         BombManager.instance.SetLimitedClicks(count,useInjectionTurn);
 
+    }
+
+    public void OnCloseChange()
+    {
+        p1to2.SetActive(false);
+        p2to1.SetActive(false);
     }
 
 }
