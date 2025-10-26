@@ -16,6 +16,7 @@ public class BombManager : MonoBehaviour
     [Header("爆弾のbool")]
     public bool bombClicked = false;
     public bool hasHalfBombCount = false;
+    public bool isInjectionActive = false;
 
     [Header("爆弾を叩く上限")]
     public int maxBombClickCount;
@@ -30,6 +31,9 @@ public class BombManager : MonoBehaviour
 
     [Header("名前入力画面")]
     public GameObject nameInputObj;
+
+    [Header("注射を使用したターン")]
+    public GameManager.PlayerTurn useInjectionTurn = GameManager.PlayerTurn.None;
 
     private void Awake()
     {
@@ -109,39 +113,23 @@ public class BombManager : MonoBehaviour
     public void BombClick()
     {
         //注射を使用された時
-        if (forcedClickLimit > 0)
-        {
-            currentBombClickCount++;
-            currentBombCount--;
+        isInjectionActive = (forcedClickLimit > 0 && useInjectionTurn != GameManager.instance.currentPlayerTurn);
 
-            //指定回数叩いたとき
-            if (currentBombClickCount >= forcedClickLimit)
-            {
-                Debug.Log("注射効果終了");
-                
-                bombClicked = true;
-                forcedClickLimit = -1;
-                GameManager.instance.PassTurn();
-            }
-        }
+        //叩ける回数に上限を設ける
+        maxBombClickCount = isInjectionActive ? forcedClickLimit : 3;
+
         //通常状態
-        else
+
+        //上限回数以上叩けない
+        if (currentBombClickCount >= maxBombClickCount)
         {
-            //爆弾を叩ける回数に上限を設ける
-            maxBombClickCount = 3;
-
-            if (currentBombClickCount >= maxBombClickCount)
-            {
-                Debug.Log("これ以上爆弾は叩けない");
-                return;
-            }
-
-            bombClicked = true;
-            currentBombClickCount++;
-            currentBombCount--;
-            Debug.Log("現在のカウント数は" + currentBombCount);
+            Debug.Log("これ以上爆弾は叩けない");
+            return;
         }
-        
+        currentBombClickCount++;
+        currentBombCount--;
+        Debug.Log("現在のカウント数は" + currentBombCount);
+
 
         //カウントが半分になればアイテムを配布
         if (!hasHalfBombCount && halfBombCount >= currentBombCount)
@@ -160,6 +148,25 @@ public class BombManager : MonoBehaviour
         }
 
         UpdateBombCount();
+
+        //注射効果中
+        if (isInjectionActive)
+        {
+            //指定回数叩いたとき
+            if (currentBombClickCount >= maxBombClickCount)
+            {
+                bombClicked = true;
+            }
+            else
+            {
+                bombClicked = false;
+            }
+        }
+        //通常時
+        else
+        {
+            bombClicked = true;
+        }
     }
 
     //現在の爆弾のカウント数を表示する
@@ -171,6 +178,13 @@ public class BombManager : MonoBehaviour
     //ターン終了時に叩いたカウントをリセットする
     public void ResetTrunBombClick()
     {
+        //注射の効果を終了する
+        if (isInjectionActive)
+        {
+            Debug.Log("注射効果終了");
+            forcedClickLimit = -1;
+            useInjectionTurn = GameManager.PlayerTurn.None;
+        }
         currentBombClickCount = 0;
         bombClicked = false;
         Debug.Log("爆弾を叩いた数をリセットしました");
@@ -198,10 +212,11 @@ public class BombManager : MonoBehaviour
         ItemDistribution.instance.GiveRandomItems(targetInventry, 1);
     }
 
-    public void SetLimitedClicks(int max)
+    public void SetLimitedClicks(int max,GameManager.PlayerTurn injectionTurn)
     {
         forcedClickLimit = max;
-        maxBombClickCount = forcedClickLimit;
+
+        useInjectionTurn = injectionTurn;
     }
 
     public void AddBombCount(int add)

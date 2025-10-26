@@ -118,7 +118,7 @@ public class ItemManager : MonoBehaviour
             }
 
             // BombManager に選択した回数を渡して制限
-            BombManager.instance.SetLimitedClicks(value);
+            //BombManager.instance.SetLimitedClicks(value);
             Debug.Log($"💉 相手の叩く回数を {value} 回に制限しました");
 
             // UIでの選択完了後にフラグON

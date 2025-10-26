@@ -71,7 +71,7 @@ public class ItemUIManager : MonoBehaviour
             //’Ë
             case 2:
                 Debug.Log("’Ë‚ğg—p‚µ‚½");
-                injection.instance.OpenUI();
+                injection.instance.OpenUI(currentTurn);
                 break;
             //ƒŠƒ‚ƒRƒ“
             case 3:

@@ -20,9 +20,6 @@ public class GameManager : MonoBehaviour
     string player1name = "Player1";
     string player2name = "Player2";
 
-    [Header("プレイヤー交代")]
-    public GameObject a1to2;
-    public GameObject b2to1;
 
     [Header("リザルト")]
     public GameObject resultUI;
@@ -34,7 +31,6 @@ public class GameManager : MonoBehaviour
     public GameObject gameWin;
     public TMP_Text gameWinerText;
     public TMP_Text scoreText;
-   
 
     //爆弾の所持状況
     public enum BombHolder {None,Player1,Player2}
@@ -84,13 +80,9 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //乱数の種を変える
         UnityEngine.Random.InitState(DateTime.Now.Millisecond);
         canUseItems = true;
-
-        a1to2.SetActive(false);
-        b2to1.SetActive(false);
-        resultUI.SetActive(false);
-        gameWin.SetActive(false);
 
         currentRoundCount = 0;
     }
@@ -120,6 +112,7 @@ public class GameManager : MonoBehaviour
 
         currentRoundCount++;
 
+        //ラウンドテキストを変える
         if (roundText != null) 
         {
             roundText.text = $"Round {currentRoundCount}";
@@ -210,7 +203,6 @@ public class GameManager : MonoBehaviour
         //アイテム使用が1回だけならアイテムを使用可能
         useItemButton.interactable = canUseItems;
 
-
         //爆弾を1回以上叩かなければならない
         if (BombManager.instance != null && nextTurnButton != null)
         {
@@ -237,14 +229,12 @@ public class GameManager : MonoBehaviour
     public void PassTurn()
     {
         Debug.Log($"{currentPlayerTurn}");
+
+        //爆弾を相手に渡す(ターンを相手に渡す)
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
             currentPlayerTurn = PlayerTurn.Player2;
             PassBomb();
-
-            //プレイヤーアイテム切り替える
-            a1to2.SetActive(true);
-            Debug.Log($"{player1name}から{player2name}へターンを渡した");
 
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
@@ -253,12 +243,8 @@ public class GameManager : MonoBehaviour
             PassBomb();
 
             //プレイヤーアイテム切り替える
-            b2to1.SetActive(true);
             Debug.Log($"{player2name}から{player1name}へターンを渡した");
-
         }
-
-
 
         //爆弾を叩いた回数をリセット
         if (BombManager.instance != null)
@@ -291,7 +277,6 @@ public class GameManager : MonoBehaviour
     //相手のターンを飛ばす関数
     public void SkipOpponentTurn()
     {
-        Debug.Log($"{currentPlayerTurn}");
         Debug.Log("相手のターンをスキップします");
 
         if (currentPlayerTurn == PlayerTurn.Player1)
@@ -406,17 +391,15 @@ public class GameManager : MonoBehaviour
         UpdateTurnUI();
     }
 
+
     public void Player1GameWin()
     {
-        gameWin.SetActive(true);
-        gameWinerText.text = player1name;
-        scoreText.text = ($"{player1WinCount}-{player2WinCount}");
+
     }
 
     public void Player2GameWin()
     {
-        gameWin.SetActive(true);
-        gameWinerText.text = player2name;
-        scoreText.text = ($"{player2WinCount}-{player1WinCount}");
+
     }
+
 }
