@@ -13,6 +13,9 @@ public class injection : MonoBehaviour
     [Header("UI本体")]
     public GameObject ui;
 
+    [Header("注射を使用したターン")]
+    public GameManager.PlayerTurn useInjectionTurn = GameManager.PlayerTurn.None;
+
     public void Awake()
     {
         if (instance == null)
@@ -24,9 +27,10 @@ public class injection : MonoBehaviour
     }
 
     //UIの表示
-    public void OpenUI()
-    {
+    public void OpenUI(GameManager.PlayerTurn useTurn)
+    { 
         ui.SetActive(true);
+        useInjectionTurn = useTurn;
     }
 
     public void OnButton1()
@@ -51,9 +55,8 @@ public class injection : MonoBehaviour
         ui.SetActive(false);
 
         // 相手ターンの爆弾叩く回数を設定
-        BombManager.instance.SetLimitedClicks(count);
+        BombManager.instance.SetLimitedClicks(count,useInjectionTurn);
 
-        GameManager.instance.PassTurn();
     }
 
 }
