@@ -1,24 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class injection : MonoBehaviour
+public class RemoteControl : MonoBehaviour
 {
-    public static injection instance;
+    public static RemoteControl instance;
 
     [Header("数指定ボタン")]
     public Button button1;
     public Button button2;
     public Button button3;
 
-    [Header("交代表示")]
-    public GameObject p1to2;
-    public GameObject p2to1;
-
     [Header("UI本体")]
     public GameObject ui;
-
-    [Header("注射を使用したターン")]
-    public GameManager.PlayerTurn useInjectionTurn = GameManager.PlayerTurn.None;
 
     public void Awake()
     {
@@ -31,10 +24,9 @@ public class injection : MonoBehaviour
     }
 
     //UIの表示
-    public void OpenUI(GameManager.PlayerTurn useTurn)
-    { 
+    public void OpenUI()
+    {
         ui.SetActive(true);
-        useInjectionTurn = useTurn;
     }
 
     public void OnButton1()
@@ -59,14 +51,8 @@ public class injection : MonoBehaviour
         ui.SetActive(false);
 
         // 相手ターンの爆弾叩く回数を設定
-        BombManager.instance.SetLimitedClicks(count,useInjectionTurn);
+        BombManager.instance.AddBombCount(count);
 
-    }
-
-    public void OnCloseChange()
-    {
-        p1to2.SetActive(false);
-        p2to1.SetActive(false);
     }
 
 }
