@@ -152,7 +152,7 @@ public class ItemManager : MonoBehaviour
     private void UseDriver()
     {
         Debug.Log("🔧 ドライバー使用：爆弾カウントを相手ターン中は非表示にする");
-        BombManager.instance.HideBombCountForOpponent();
+        //BombManager.instance.HideBombCountForOpponent();
     }
 
     // ===============================

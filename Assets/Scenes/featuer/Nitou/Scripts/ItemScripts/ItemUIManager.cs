@@ -75,9 +75,13 @@ public class ItemUIManager : MonoBehaviour
                 break;
             //リモコン
             case 3:
+                Debug.Log("リモコンを使用した");
+                RemoteControl.instance.OpenUI();
             break;
             //ドライバー
             case 4:
+                Debug.Log("ドライバーを使用した");
+                BombManager.instance.HideBombCountForOpponent(currentTurn);
             break;
         }
 

@@ -17,6 +17,7 @@ public class BombManager : MonoBehaviour
     public bool bombClicked = false;
     public bool hasHalfBombCount = false;
     public bool isInjectionActive = false;
+    public bool isDriverActive = false;
 
     [Header("爆弾を叩く上限")]
     public int maxBombClickCount;
@@ -34,6 +35,10 @@ public class BombManager : MonoBehaviour
 
     [Header("注射を使用したターン")]
     public GameManager.PlayerTurn useInjectionTurn = GameManager.PlayerTurn.None;
+
+    [Header("ドライバーを使用したターン")]
+    public int useDriver = -1;
+    public GameManager.PlayerTurn useDriverTurn = GameManager.PlayerTurn.None;
 
     private void Awake()
     {
@@ -170,9 +175,20 @@ public class BombManager : MonoBehaviour
     }
 
     //現在の爆弾のカウント数を表示する
-    private void UpdateBombCount()
+    public void UpdateBombCount()
     {
-        bombCountText.text = $"{currentBombCount}";
+        //ドライバーを使用したとき
+        if (useDriver > 0 && useDriverTurn != GameManager.instance.currentPlayerTurn) 
+        {
+            Debug.Log("<color=yellow>ドライバーの効果適用</color>");
+            isDriverActive = true;
+            bombCountText.text = "  ";
+        }
+        //通常時
+        else
+        {
+            bombCountText.text = $"{currentBombCount}";
+        }
     }
 
     //ターン終了時に叩いたカウントをリセットする
@@ -184,6 +200,14 @@ public class BombManager : MonoBehaviour
             Debug.Log("注射効果終了");
             forcedClickLimit = -1;
             useInjectionTurn = GameManager.PlayerTurn.None;
+        }
+        //ドライバーの効果を終了する
+        if (isDriverActive)
+        {
+            Debug.Log("ドライバー効果終了");
+            useDriver = -1;
+            isDriverActive = false;
+            useDriverTurn = GameManager.PlayerTurn.None;
         }
         currentBombClickCount = 0;
         bombClicked = false;
@@ -222,13 +246,23 @@ public class BombManager : MonoBehaviour
     public void AddBombCount(int add)
     {
         currentBombCount += add;
+        //カウント数は最大値より大きくしない
+        if (currentBombCount >= bombCount)
+        {
+            currentBombCount = bombCount;
+        }
+        //カウントUIを更新
+        UpdateBombCount();
         Debug.Log($"爆弾カウントを +{add} しました。現在: {bombCount}");
     }
 
-    public void HideBombCountForOpponent()
+    public void HideBombCountForOpponent(GameManager.PlayerTurn remoteControlTurn)
     {
         Debug.Log("相手から爆弾カウントを隠しました");
-        // UI上で相手に表示しないなどの処理を実装
+        useDriver = 1;
+        //ドライバーを使用したターンを保存
+        useDriverTurn = remoteControlTurn;
+        UpdateBombCount();
     }
 
 }
