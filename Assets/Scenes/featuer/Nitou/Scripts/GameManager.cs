@@ -20,6 +20,18 @@ public class GameManager : MonoBehaviour
     string player1name = "Player1";
     string player2name = "Player2";
 
+
+    [Header("リザルト")]
+    public GameObject resultUI;
+
+    [Header("勝者")]
+    public TMP_Text winerText;
+
+    [Header("ゲーム勝利")]
+    public GameObject gameWin;
+    public TMP_Text gameWinerText;
+    public TMP_Text scoreText;
+
     //爆弾の所持状況
     public enum BombHolder {None,Player1,Player2}
 
@@ -87,12 +99,14 @@ public class GameManager : MonoBehaviour
         if (player1WinCount >= winCount)
         {
             Debug.Log($"{player1name}");
+            Player1GameWin();
             return;
         }
 
         if (player2WinCount >= winCount)
         {
             Debug.Log($"{player2name}");
+            Player2GameWin();
             return;
         }
 
@@ -228,6 +242,8 @@ public class GameManager : MonoBehaviour
             currentPlayerTurn = PlayerTurn.Player1;
             PassBomb();
 
+            //プレイヤーアイテム切り替える
+            Debug.Log($"{player2name}から{player1name}へターンを渡した");
         }
 
         //爆弾を叩いた回数をリセット
@@ -326,16 +342,13 @@ public class GameManager : MonoBehaviour
     {
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
-            Player2Win();
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
         {
-            Player1Win();
         }
     }
 
     //プレイヤー1が勝利したときの処理
-    private void Player1Win()
     {
         Debug.Log($"{player1name}が勝利しました");
         player1WinCount++;
@@ -344,7 +357,6 @@ public class GameManager : MonoBehaviour
     }
 
     //プレイヤー2が勝利したときの処理
-    private void Player2Win()
     {
         Debug.Log($"{player2name}が勝利しました");
         player2WinCount++;
@@ -374,4 +386,16 @@ public class GameManager : MonoBehaviour
 
         UpdateTurnUI();
     }
+
+
+    public void Player1GameWin()
+    {
+
+    }
+
+    public void Player2GameWin()
+    {
+
+    }
+
 }
