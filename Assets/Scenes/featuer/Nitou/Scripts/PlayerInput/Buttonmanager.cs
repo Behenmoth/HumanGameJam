@@ -1,12 +1,15 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Buttonmanager : MonoBehaviour
 {
-    public GameObject roleBook;
+    //public GameObject roleBook;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        roleBook.SetActive(false);
+        //roleBook.SetActive(false);
+        //resultUi.SetActive(false);
     }
 
     // Update is called once per frame
@@ -17,11 +20,41 @@ public class Buttonmanager : MonoBehaviour
 
     public void OnRoleBook()
     {
-        roleBook.SetActive(true);
+        //roleBook.SetActive(true);
     }
 
     public void OnCloseRoleBook()
     {
-        roleBook.SetActive(false);
+        //roleBook.SetActive(false);
+ 
+    }
+
+    public void OnCloseResultUI()
+    {
+        if (GameManager.instance.currentPlayerTurn == GameManager.PlayerTurn.Player1)
+        {
+            GameManager.instance.resultUI.SetActive(false);
+            GameManager.instance.Player1Win();
+        }
+        else if (GameManager.instance.currentPlayerTurn == GameManager.PlayerTurn.Player2)
+        {
+            GameManager.instance.resultUI.SetActive(false);
+            GameManager.instance.Player2Win();
+        }
+    }
+
+    public void ReturnTitle()
+    {
+        SceneManager.LoadScene("TitleScene");
+    }
+
+    public void ReStart()
+    {
+        SceneManager.LoadScene("MaineScene");
+    }
+
+    public void Exit()
+    {
+        Application.Quit();
     }
 }

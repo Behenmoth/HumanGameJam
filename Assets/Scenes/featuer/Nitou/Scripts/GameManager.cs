@@ -20,9 +20,17 @@ public class GameManager : MonoBehaviour
     string player1name = "Player1";
     string player2name = "Player2";
 
-    [Header("プレイヤー交代")]
-    public GameObject a1to2;
-    public GameObject b2to1;
+
+    [Header("リザルト")]
+    public GameObject resultUI;
+
+    [Header("勝者")]
+    public TMP_Text winerText;
+
+    [Header("ゲーム勝利")]
+    public GameObject gameWin;
+    public TMP_Text gameWinerText;
+    public TMP_Text scoreText;
 
     //爆弾の所持状況
     public enum BombHolder {None,Player1,Player2}
@@ -72,11 +80,9 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //乱数の種を変える
         UnityEngine.Random.InitState(DateTime.Now.Millisecond);
         canUseItems = true;
-
-        a1to2.SetActive(false);
-        b2to1.SetActive(false);
 
         currentRoundCount = 0;
     }
@@ -93,17 +99,20 @@ public class GameManager : MonoBehaviour
         if (player1WinCount >= winCount)
         {
             Debug.Log($"{player1name}");
+            Player1GameWin();
             return;
         }
 
         if (player2WinCount >= winCount)
         {
             Debug.Log($"{player2name}");
+            Player2GameWin();
             return;
         }
 
         currentRoundCount++;
 
+        //ラウンドテキストを変える
         if (roundText != null) 
         {
             roundText.text = $"Round {currentRoundCount}";
@@ -194,7 +203,6 @@ public class GameManager : MonoBehaviour
         //アイテム使用が1回だけならアイテムを使用可能
         useItemButton.interactable = canUseItems;
 
-
         //爆弾を1回以上叩かなければならない
         if (BombManager.instance != null && nextTurnButton != null)
         {
@@ -221,14 +229,12 @@ public class GameManager : MonoBehaviour
     public void PassTurn()
     {
         Debug.Log($"{currentPlayerTurn}");
+
+        //爆弾を相手に渡す(ターンを相手に渡す)
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
             currentPlayerTurn = PlayerTurn.Player2;
             PassBomb();
-
-            //プレイヤーアイテム切り替える
-            a1to2.SetActive(true);
-            Debug.Log($"{player1name}から{player2name}へターンを渡した");
 
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
@@ -237,12 +243,8 @@ public class GameManager : MonoBehaviour
             PassBomb();
 
             //プレイヤーアイテム切り替える
-            b2to1.SetActive(false);
             Debug.Log($"{player2name}から{player1name}へターンを渡した");
-
         }
-
-
 
         //爆弾を叩いた回数をリセット
         if (BombManager.instance != null)
@@ -266,6 +268,9 @@ public class GameManager : MonoBehaviour
         // ターンUI更新
         UpdateTurnUI();
 
+        //爆弾カウントUIを更新
+        BombManager.instance.UpdateBombCount();
+
         //表示するアイテムを切り替え
         player1Inventory.SetActiveObjects(currentPlayerTurn);
         player2Inventory.SetActiveObjects(currentPlayerTurn);
@@ -275,7 +280,6 @@ public class GameManager : MonoBehaviour
     //相手のターンを飛ばす関数
     public void SkipOpponentTurn()
     {
-        Debug.Log($"{currentPlayerTurn}");
         Debug.Log("相手のターンをスキップします");
 
         if (currentPlayerTurn == PlayerTurn.Player1)
@@ -338,16 +342,19 @@ public class GameManager : MonoBehaviour
     {
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
-            Player2Win();
+            winerText.text = player2name;
+            resultUI.SetActive(true);
+            
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
         {
-            Player1Win();
+            winerText.text = player1name;
+            resultUI.SetActive(true);
         }
     }
 
     //プレイヤー1が勝利したときの処理
-    private void Player1Win()
+    public void Player1Win()
     {
         Debug.Log($"{player1name}が勝利しました");
         player1WinCount++;
@@ -356,7 +363,7 @@ public class GameManager : MonoBehaviour
     }
 
     //プレイヤー2が勝利したときの処理
-    private void Player2Win()
+    public void Player2Win()
     {
         Debug.Log($"{player2name}が勝利しました");
         player2WinCount++;
@@ -387,5 +394,15 @@ public class GameManager : MonoBehaviour
         UpdateTurnUI();
     }
 
-    
+
+    public void Player1GameWin()
+    {
+
+    }
+
+    public void Player2GameWin()
+    {
+
+    }
+
 }
