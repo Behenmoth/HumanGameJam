@@ -268,6 +268,9 @@ public class GameManager : MonoBehaviour
         // ターンUI更新
         UpdateTurnUI();
 
+        //爆弾カウントUIを更新
+        BombManager.instance.UpdateBombCount();
+
         //表示するアイテムを切り替え
         player1Inventory.SetActiveObjects(currentPlayerTurn);
         player2Inventory.SetActiveObjects(currentPlayerTurn);
