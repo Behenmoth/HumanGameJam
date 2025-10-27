@@ -342,13 +342,19 @@ public class GameManager : MonoBehaviour
     {
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
+            winerText.text = player2name;
+            resultUI.SetActive(true);
+            
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
         {
+            winerText.text = player1name;
+            resultUI.SetActive(true);
         }
     }
 
     //プレイヤー1が勝利したときの処理
+    public void Player1Win()
     {
         Debug.Log($"{player1name}が勝利しました");
         player1WinCount++;
@@ -357,6 +363,7 @@ public class GameManager : MonoBehaviour
     }
 
     //プレイヤー2が勝利したときの処理
+    public void Player2Win()
     {
         Debug.Log($"{player2name}が勝利しました");
         player2WinCount++;
