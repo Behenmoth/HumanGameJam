@@ -71,13 +71,17 @@ public class ItemUIManager : MonoBehaviour
             //注射
             case 2:
                 Debug.Log("注射を使用した");
-                injection.instance.OpenUI();
+                injection.instance.OpenUI(currentTurn);
                 break;
             //リモコン
             case 3:
+                Debug.Log("リモコンを使用した");
+                RemoteControl.instance.OpenUI();
             break;
             //ドライバー
             case 4:
+                Debug.Log("ドライバーを使用した");
+                BombManager.instance.HideBombCountForOpponent(currentTurn);
             break;
         }
 
