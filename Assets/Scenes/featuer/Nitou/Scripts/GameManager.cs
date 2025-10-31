@@ -340,16 +340,15 @@ public class GameManager : MonoBehaviour
     //GameOver時の処理
     public void GameOver()
     {
+        //プレイヤー２が勝利したとき
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
-            winerText.text = player2name;
-            resultUI.SetActive(true);
-            
+            Player2Win();
         }
+        //プレイヤー1が勝利したとき
         else if (currentPlayerTurn == PlayerTurn.Player2)
         {
-            winerText.text = player1name;
-            resultUI.SetActive(true);
+            Player1Win();
         }
     }
 
