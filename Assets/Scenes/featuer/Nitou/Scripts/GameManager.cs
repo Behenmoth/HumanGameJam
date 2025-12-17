@@ -252,7 +252,6 @@ public class GameManager : MonoBehaviour
             BombManager.instance.ResetTrunBombClick();
         }
 
-
         if (CountDownTimer.instance != null)
         {
             //タイマーをリセットする

@@ -117,46 +117,21 @@ public class BombManager : MonoBehaviour
     //爆弾のカウントを減らす
     public void BombClick()
     {
-        //注射を使用された時
-        isInjectionActive = (forcedClickLimit > 0 && useInjectionTurn != GameManager.instance.currentPlayerTurn);
-
-        //叩ける回数に上限を設ける
-        maxBombClickCount = isInjectionActive ? forcedClickLimit : 3;
-
-        //通常状態
-
-        //上限回数以上叩けない
-        if (currentBombClickCount >= maxBombClickCount)
-        {
-            Debug.Log("これ以上爆弾は叩けない");
-            return;
-        }
-        currentBombClickCount++;
-        currentBombCount--;
-        Debug.Log("現在のカウント数は" + currentBombCount);
-
-
-        //カウントが半分になればアイテムを配布
-        if (!hasHalfBombCount && halfBombCount >= currentBombCount)
-        {
-            hasHalfBombCount = true;
-            GiveItemToCurrentPlayer();
-        }
-
-        //カウントが0以下になれば爆発する
-        if (currentBombCount <= 0)
-        {
-            currentBombCount = 0;
-            Debug.Log("爆弾が爆発した");
-
-            GameManager.instance.GameOver();
-        }
-
-        UpdateBombCount();
-
         //注射効果中
-        if (isInjectionActive)
+        if (isInjectionActive && useInjectionTurn != GameManager.instance.currentPlayerTurn)
         {
+            //叩ける回数を指定回数にする
+            maxBombClickCount = forcedClickLimit;
+
+            if (currentBombClickCount >= maxBombClickCount)
+            {
+                Debug.Log("これ以上爆弾は叩けない");
+                return;
+            }
+
+            currentBombClickCount++;
+            currentBombCount--;
+
             //指定回数叩いたとき
             if (currentBombClickCount >= maxBombClickCount)
             {
@@ -170,8 +145,41 @@ public class BombManager : MonoBehaviour
         //通常時
         else
         {
+            //叩ける回数に上限を設ける
+            maxBombClickCount = 3;
+
+            if (currentBombClickCount >= maxBombClickCount)
+            {
+                Debug.Log("これ以上爆弾は叩けない");
+                return;
+            }
+
             bombClicked = true;
+            currentBombClickCount++;
+            currentBombCount--;
         }
+
+        Debug.Log("現在のカウント数は" + currentBombCount);
+
+        //カウントが半分になればアイテムを配布
+        if (!hasHalfBombCount && halfBombCount >= currentBombCount)
+        {
+            hasHalfBombCount = true;
+            GiveItemToCurrentPlayer();
+        }
+
+        //カウントが0以下になれば爆発する
+        if (currentBombCount <= 0)
+        {
+            currentBombCount = 0;
+            Debug.Log("爆弾が爆発した");
+            bombClicked = false;
+            hasHalfBombCount = false;
+            GameManager.instance.GameOver();
+            return;
+        }
+
+        UpdateBombCount();
     }
 
     //現在の爆弾のカウント数を表示する
@@ -195,11 +203,12 @@ public class BombManager : MonoBehaviour
     public void ResetTrunBombClick()
     {
         //注射の効果を終了する
-        if (isInjectionActive)
+        if (isInjectionActive&& useInjectionTurn == GameManager.instance.currentPlayerTurn)
         {
             Debug.Log("注射効果終了");
             forcedClickLimit = -1;
             useInjectionTurn = GameManager.PlayerTurn.None;
+            isInjectionActive = false;
         }
         //ドライバーの効果を終了する
         if (isDriverActive)
@@ -239,8 +248,9 @@ public class BombManager : MonoBehaviour
     public void SetLimitedClicks(int max,GameManager.PlayerTurn injectionTurn)
     {
         forcedClickLimit = max;
-
         useInjectionTurn = injectionTurn;
+
+        isInjectionActive = true;
     }
 
     public void AddBombCount(int add)
@@ -264,5 +274,4 @@ public class BombManager : MonoBehaviour
         useDriverTurn = remoteControlTurn;
         UpdateBombCount();
     }
-
 }
