@@ -4859,11 +4859,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemDistribution
   allItems:
-  - {fileID: 11400000, guid: 931d0a8654e9ac44699795a1fd9e68b5, type: 2}
   - {fileID: 11400000, guid: f493a9fd91832504c88b3fd47a0fcf8d, type: 2}
   - {fileID: 11400000, guid: dd43cc737a533fa458ccfb46422c15f8, type: 2}
-  - {fileID: 11400000, guid: d999ef2c16263d24b845b3c73a91488d, type: 2}
-  - {fileID: 11400000, guid: 04143de7495db084ab5f1e484feb09bf, type: 2}
   player1Inventry: {fileID: 1161257466}
   player2Inventry: {fileID: 950631899}
 --- !u!114 &1814098086
@@ -7673,7 +7670,12 @@ MonoBehaviour:
   bombCountText: {fileID: 1120541373}
   mainCamera: {fileID: 961739752}
   nameInputObj: {fileID: 537020621}
-  useInjectionTurn: 0
+  useInjectuonPlayer1:
+    active: 0
+    limit: 0
+  useInjectionPlayer2:
+    active: 0
+    limit: 0
   useDriver: -1
   useDriverTurn: 0
 --- !u!23 &6498805128531892414
