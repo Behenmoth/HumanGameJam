@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
+//注射器用構造隊
 [System.Serializable]
 public struct InjectionState
 {
@@ -25,6 +26,28 @@ public struct InjectionState
         active = true;
         limit = value;
         isInjectionFinish = false;
+    }
+};
+
+//ドライバー用構造隊
+[Serializable]
+public struct DriverState
+{
+    public bool active;
+    public bool isDriverFinish;
+
+    //状態をリセット
+    public void Clear()
+    {
+        active = false;
+        isDriverFinish = false;
+    }
+
+    //カウント数を隠すようにする
+    public void Set()
+    {
+        active = true;
+        isDriverFinish = false;
     }
 }
 
@@ -64,6 +87,10 @@ public class BombManager : MonoBehaviour
     [Header("ドライバーを使用したターン")]
     public int useDriver = -1;
     public GameManager.PlayerTurn useDriverTurn = GameManager.PlayerTurn.None;
+
+    [Header("ドライバー用のプレイヤーの状態")]
+    public DriverState useDriverPlayer1;
+    public DriverState useDriverPlayer2;
 
     private void Awake()
     {
@@ -145,6 +172,7 @@ public class BombManager : MonoBehaviour
         //現在のターン
         var turn = GameManager.instance.currentPlayerTurn;
 
+        //注射器を使用していた場合
         //プレイヤー1の場合
         if (turn == GameManager.PlayerTurn.Player1 && useInjectionPlayer2.active) 
         {
@@ -161,6 +189,17 @@ public class BombManager : MonoBehaviour
             NormalBombClick();
         }
 
+        //ドライバーを使用していた場合、爆弾を叩くことで終了させる
+        //プレイヤー1の場合
+        if (turn == GameManager.PlayerTurn.Player1 && useDriverPlayer2.active)
+        {
+            useDriverPlayer2.isDriverFinish = true;
+        }
+        //プレイヤー2の場合
+        else if (turn == GameManager.PlayerTurn.Player2 && useDriverPlayer1.active)
+        {
+            useDriverPlayer1.isDriverFinish = true;
+        }
         Debug.Log("現在のカウント数は" + currentBombCount);
 
         //カウントが半分になればアイテムを配布
@@ -204,11 +243,17 @@ public class BombManager : MonoBehaviour
     //現在の爆弾のカウント数を表示する
     public void UpdateBombCount()
     {
+        //現在のターンを保存
+        var turn = GameManager.instance.currentPlayerTurn;
         //ドライバーを使用したとき
-        if (useDriver > 0 && useDriverTurn != GameManager.instance.currentPlayerTurn) 
+        //プレイヤー1の場合
+        if (turn == GameManager.PlayerTurn.Player1 && useDriverPlayer2.active)
         {
-            Debug.Log("<color=yellow>ドライバーの効果適用</color>");
-            isDriverActive = true;
+            bombCountText.text = "  ";
+        }
+        //プレイヤー1の場合
+        else if (turn == GameManager.PlayerTurn.Player2 && useDriverPlayer1.active)
+        {
             bombCountText.text = "  ";
         }
         //通常時
@@ -228,23 +273,26 @@ public class BombManager : MonoBehaviour
         //プレイヤー1の場合
         if (turn == GameManager.PlayerTurn.Player1 && useInjectionPlayer2.isInjectionFinish)  
         {
-            Debug.Log("注射効果終了");
+            Debug.Log("プレイヤー2の注射効果終了");
             useInjectionPlayer2.Clear();
         }
         //プレイヤー2の場合
         else if(turn == GameManager.PlayerTurn.Player2 && useInjectionPlayer1.isInjectionFinish)
         {
-            Debug.Log("注射効果終了");
+            Debug.Log("プレイヤー1の注射効果終了");
             useInjectionPlayer1.Clear();
         }
 
         //ドライバーの効果を終了する
-        if (isDriverActive)
+        if (turn == GameManager.PlayerTurn.Player1 && useDriverPlayer2.isDriverFinish) 
         {
-            Debug.Log("ドライバー効果終了");
-            useDriver = -1;
-            isDriverActive = false;
-            useDriverTurn = GameManager.PlayerTurn.None;
+            Debug.Log("プレイヤー1のドライバー効果終了");
+            useDriverPlayer2.Clear();
+        }
+        else if(turn == GameManager.PlayerTurn.Player2 && useDriverPlayer1.isDriverFinish)
+        {
+            Debug.Log("プレイヤー2のドライバー効果終了");
+            useDriverPlayer1.Clear();
         }
         currentBombClickCount = 0;
         bombClicked = false;
@@ -315,28 +363,6 @@ public class BombManager : MonoBehaviour
             bombClicked = false;
         }
     }
-    //注射器を使用されているか判定
-    private bool UseInjectionPlayer(ref InjectionState injectionState)
-    {
-        //現在のターンを取得
-        var turn = GameManager.instance.currentPlayerTurn;
-
-        //プレイヤー1のターン時プレイヤー2が注射器を使用している
-        if(turn == GameManager.PlayerTurn.Player1 && useInjectionPlayer2.active)
-        {
-            injectionState = useInjectionPlayer2;
-            return true;
-        }
-        //プレイヤー2のターン時プレイヤー1が注射器を使用している
-        if(turn == GameManager.PlayerTurn.Player2 && useInjectionPlayer1.active)
-        {
-            injectionState = useInjectionPlayer1;
-            return true;
-        }
-
-        //どちらも注射器を使用していない
-        return false;
-    }
 
     //リモコンの処理
     //カウントを増やす
@@ -355,12 +381,25 @@ public class BombManager : MonoBehaviour
 
     //ドライバーの処理
     //カウント数を隠す
-    public void HideBombCountForOpponent(GameManager.PlayerTurn remoteControlTurn)
+    public void HideBombCountForOpponent(GameManager.PlayerTurn driverTurn)
     {
         Debug.Log("相手から爆弾カウントを隠しました");
         useDriver = 1;
         //ドライバーを使用したターンを保存
-        useDriverTurn = remoteControlTurn;
+        useDriverTurn = driverTurn;
+
+        //プレイヤー1が注射器を使用した場合
+        if (driverTurn == GameManager.PlayerTurn.Player1)
+        {
+            useDriverPlayer1.Set();
+        }
+        //プレイヤー2が注射器を使用した場合
+        else if (driverTurn == GameManager.PlayerTurn.Player2)
+        {
+            useDriverPlayer2.Set();
+        }
+
+        //効果を反映
         UpdateBombCount();
     }
 }
