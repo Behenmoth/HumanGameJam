@@ -140,6 +140,9 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("BombManager がシーンに存在しません");
         }
 
+        //ラウンド開始テキストを表示
+        UIManager.instance.ShowRoundStart(currentRoundCount, BombManager.instance.bombCount);
+
         //現在のターンを表示
         UpdateTurnUI();
 
@@ -375,10 +378,12 @@ public class GameManager : MonoBehaviour
         if (currentPlayerTurn == PlayerTurn.Player1)
         {
             turnText.text = $"{player1name}";
+            turnText.color = Color.blue;
         }
         else if (currentPlayerTurn == PlayerTurn.Player2)
         {
             turnText.text = $"{player2name}";
+            turnText.color = Color.red;
         }
         
     }
