@@ -25,6 +25,12 @@ public class CountDownTimer : MonoBehaviour
 
     private void Update()
     {
+        //演出用UIが表示されているときはカウントダウンしない
+        if (UIManager.instance.isUIBlocking)
+        {
+            return;
+        }
+
         //カウントダウン中のみ動く
         if (isCountDown)
         {

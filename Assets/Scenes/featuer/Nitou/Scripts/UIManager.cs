@@ -7,13 +7,23 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
 
+    [Header("UIの動作チェック")]
+    public bool isUIBlocking = false;
+
     [Header("ラウンドUI")]
     [SerializeField] private GameObject roundUI;
-    [SerializeField] private Image roundImage;
+    [SerializeField] private CanvasGroup roundImage;
     [SerializeField] private TMP_Text roundText;
     [SerializeField] private TMP_Text bombText;
 
+    [Header("リザルトUI")]
+    [SerializeField] private GameObject resultUI;
+    [SerializeField] private CanvasGroup resultImage;
+    [SerializeField] private TMP_Text winnerText;
+    [SerializeField] private TMP_Text scoreText;
+
     [Header("演出設定")]
+    [SerializeField] private float initialAlpha = 0.6f;
     [SerializeField] private float displayTime = 2f;
     [SerializeField] private float fadeDuration = 0.3f;
 
@@ -28,6 +38,9 @@ public class UIManager : MonoBehaviour
             Destroy(gameObject);
         }
         roundUI.SetActive(false);
+        roundImage.alpha = 0f;
+        roundImage.interactable = false;
+        roundImage.blocksRaycasts = false;
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -44,46 +57,61 @@ public class UIManager : MonoBehaviour
     //ラウンド開始UIを表示する
     public void ShowRoundStart(int round,int count)
     {
-        RoundStart(round, count);
+        RoundStart(round, count).Forget();
     }
 
+    //ゲーム終了時のリザルトUIを表示する
+    public void ShowResult(string winnerName,int player1,int player2)
+    {
+        Result(winnerName, player1, player2);
+    }
+
+    //ラウンド表示処理
     private async UniTaskVoid RoundStart(int round,int count)
     {
+        //UIロック
+        isUIBlocking = true;
+        roundImage.alpha = initialAlpha;
+        
+        roundUI.SetActive(true);
+
         roundText.text = $"Round {round}";
         bombText.text = $"爆弾カウント {count}";
-
-        roundUI.SetActive(true);
 
         //表示する
         await UniTask.Delay((int)displayTime * 1000);
 
         //フェードアウト
-        await Fade(1f, 0f);
+        await Fade(roundImage,initialAlpha, 0f,fadeDuration);
+
+        roundUI.SetActive(false);
+
+        //ロック解除
+        isUIBlocking = false;
+    }
+
+    //リザルト表示処理
+    private async UniTaskVoid Result(string winnerName, int player1, int player2)
+    {
+        //UIロック
+        isUIBlocking = true;
+
 
     }
 
     //フェードさせる
-    private async UniTask Fade(float from,float to)
+    private async UniTask Fade(CanvasGroup canvasgroup, float from, float to, float duration)
     {
         float time = 0f;
-
+        canvasgroup.alpha = from;
 
         while (time < fadeDuration)
         {
             time += Time.deltaTime;
-            float alpha = Mathf.Lerp(from, to, time / fadeDuration);
-            SetAlpha(alpha);
+            canvasgroup.alpha = Mathf.Lerp(from, to, time / duration);
             await UniTask.Yield();
         }
 
-        SetAlpha(to);
-    }
-
-    //アルファ値を設定
-    private void SetAlpha(float alpha)
-    {
-        Color color = roundImage.color;
-        color.a = alpha;
-        roundImage.color = color;
+        canvasgroup.alpha = 0f;
     }
 }

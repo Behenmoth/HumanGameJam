@@ -127,6 +127,11 @@ public class BombManager : MonoBehaviour
             return;
         }
 
+        //演出用UIが表示されているときはクリックできない
+        if(UIManager.instance.isUIBlocking)
+        {
+            return;
+        }
         //クリックした場所にRayを飛ばす
         Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
