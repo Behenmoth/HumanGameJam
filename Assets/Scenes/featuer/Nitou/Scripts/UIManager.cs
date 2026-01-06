@@ -23,7 +23,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_Text scoreText;
 
     [Header("演出設定")]
-    [SerializeField] private float initialAlpha = 0.6f;
+    [SerializeField] private float roundUIInitialAlpha = 0.6f;
+    [SerializeField] private float resultUiInitialAlpha = 0f;
     [SerializeField] private float displayTime = 2f;
     [SerializeField] private float fadeDuration = 0.3f;
 
@@ -41,6 +42,8 @@ public class UIManager : MonoBehaviour
         roundImage.alpha = 0f;
         roundImage.interactable = false;
         roundImage.blocksRaycasts = false;
+
+        resultUI.SetActive(false);
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -63,7 +66,7 @@ public class UIManager : MonoBehaviour
     //ゲーム終了時のリザルトUIを表示する
     public void ShowResult(string winnerName,int player1,int player2)
     {
-        Result(winnerName, player1, player2);
+        Result(winnerName, player1, player2).Forget();
     }
 
     //ラウンド表示処理
@@ -71,7 +74,8 @@ public class UIManager : MonoBehaviour
     {
         //UIロック
         isUIBlocking = true;
-        roundImage.alpha = initialAlpha;
+        //アルファ値の初期化
+        roundImage.alpha = roundUIInitialAlpha;
         
         roundUI.SetActive(true);
 
@@ -82,7 +86,7 @@ public class UIManager : MonoBehaviour
         await UniTask.Delay((int)displayTime * 1000);
 
         //フェードアウト
-        await Fade(roundImage,initialAlpha, 0f,fadeDuration);
+        await Fade(roundImage,roundUIInitialAlpha, 0f,fadeDuration);
 
         roundUI.SetActive(false);
 
@@ -95,8 +99,19 @@ public class UIManager : MonoBehaviour
     {
         //UIロック
         isUIBlocking = true;
+        resultImage.alpha = resultUiInitialAlpha;
 
+        resultUI.SetActive(true);
 
+        winnerText.text = $"{winnerName} Win";
+        scoreText.text = $"Score {player1} - {player2}";
+
+        // フェードイン
+        await Fade(resultImage, resultUiInitialAlpha, 1f, fadeDuration);
+
+        // 操作可能にする
+        resultImage.interactable = true;
+        resultImage.blocksRaycasts = true;
     }
 
     //フェードさせる
@@ -112,6 +127,6 @@ public class UIManager : MonoBehaviour
             await UniTask.Yield();
         }
 
-        canvasgroup.alpha = 0f;
+        canvasgroup.alpha = to;
     }
 }

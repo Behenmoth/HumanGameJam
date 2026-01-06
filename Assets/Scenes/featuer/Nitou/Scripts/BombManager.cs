@@ -1,8 +1,11 @@
+using Cysharp.Threading.Tasks;
 using System;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 //注射器用構造隊
 [System.Serializable]
@@ -92,6 +95,16 @@ public class BombManager : MonoBehaviour
     public DriverState useDriverPlayer1;
     public DriverState useDriverPlayer2;
 
+    [Header("手の設定")]
+    [SerializeField] private Transform handTransform;
+    [SerializeField] private float handForwardOffset = 2f;
+    [SerializeField] private float handMoveDuration = 0.2f;
+
+    private Vector3 handInitialPosition;
+
+    [Header("アニメーター")]
+    [SerializeField] private Animator handAnimator;
+
     private void Awake()
     {
         if (instance == null) 
@@ -151,6 +164,9 @@ public class BombManager : MonoBehaviour
     void Start()
     {
         UnityEngine.Random.InitState(DateTime.Now.Millisecond);
+
+        //手の初期位置を保存
+        handInitialPosition = handTransform.localPosition;
     }
 
     // Update is called once per frame
@@ -174,6 +190,9 @@ public class BombManager : MonoBehaviour
     //爆弾のカウントを減らす
     public void BombClick()
     {
+        //アニメーションの再生
+        PlayBobmhitAnimationAsync();
+
         //現在のターン
         var turn = GameManager.instance.currentPlayerTurn;
 
@@ -406,5 +425,35 @@ public class BombManager : MonoBehaviour
 
         //効果を反映
         UpdateBombCount();
+    }
+
+    //爆弾を叩くアニメーションの再生
+    private async void PlayBobmhitAnimationAsync()
+    {
+        //手を前に出す
+        Vector3 forwardPos = handInitialPosition + Vector3.forward * handForwardOffset;
+        MoveHand(handTransform, handInitialPosition, forwardPos, handMoveDuration);
+
+        handAnimator.SetTrigger("Hit");
+
+        // 少し待つ（ヒット感）
+        await UniTask.Delay(1000);
+
+        // 元に戻す
+        MoveHand(handTransform, forwardPos, handInitialPosition, handMoveDuration);
+    }
+
+    private async UniTaskVoid MoveHand(Transform target, Vector3 from, Vector3 to, float duration)
+    {
+        float time = 0f;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            target.localPosition = Vector3.Lerp(from, to, time / duration);
+            await UniTask.Yield();
+        }
+
+        target.localPosition = to;
     }
 }

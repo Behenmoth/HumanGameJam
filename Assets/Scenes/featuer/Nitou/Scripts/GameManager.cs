@@ -400,12 +400,12 @@ public class GameManager : MonoBehaviour
 
     public void Player1GameWin()
     {
-
+        UIManager.instance.ShowResult(player1name, player1WinCount, player2WinCount);
     }
 
     public void Player2GameWin()
     {
-
+        UIManager.instance.ShowResult(player2name, player1WinCount, player2WinCount);
     }
 
 }
